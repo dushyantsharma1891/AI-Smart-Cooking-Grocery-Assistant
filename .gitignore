@@ -1,0 +1,16 @@
+# Dependencies — never commit these
+node_modules/
+
+# Environment variables — NEVER commit .env
+.env
+
+# User uploads
+uploads/
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*

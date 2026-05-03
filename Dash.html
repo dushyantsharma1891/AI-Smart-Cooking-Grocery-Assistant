@@ -1,0 +1,2563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Smart Cooking – Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;padding:0;width:100%;min-height:100vh}
+*,*::before,*::after{box-sizing:border-box}
+:root{
+  --p:#16a34a;--pd:#15803d;--pl:#dcfce7;--acc:#f59e0b;
+  --bg:#f4fdf6;--surf:#fff;--text:#0f1a12;--muted:#6b7280;--bdr:#e2f0e5;
+  --sh:0 2px 16px rgba(22,163,74,.08);--sh2:0 8px 32px rgba(22,163,74,.14);
+  --nav:64px;--sw:252px;--r:16px;
+  --fh:'Playfair Display',serif;--fb:'DM Sans',sans-serif;
+}
+body.dark{--bg:#0a1612;--surf:#111f17;--text:#e8f5e9;--muted:#8ba98f;--bdr:#1e3326;--pl:#0d2e18}
+body.dnv{--p:#dc2626;--pd:#b91c1c;--pl:#fee2e2;--bg:#fdf4f4}
+body.deg{--p:#d97706;--pd:#b45309;--pl:#fef3c7;--bg:#fdfbf4}
+body.djn{--p:#2563eb;--pd:#1d4ed8;--pl:#eff6ff;--bg:#f4f7fd}
+body.dark.dnv{--bg:#1a0808;--pl:#3b0a0a}
+body.dark.deg{--bg:#1a1404;--pl:#3b2800}
+body.dark.djn{--bg:#040c1a;--pl:#0a1640}
+body{font-family:var(--fb);background:var(--bg);color:var(--text);overflow-x:hidden;transition:background .22s,color .22s}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:5px}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;width:100%;height:var(--nav);background:var(--surf);border-bottom:1px solid var(--bdr);display:flex;align-items:center;padding:0 20px;gap:14px;z-index:500;box-shadow:var(--sh)}
+.nav-logo{font-family:var(--fh);font-size:1.25rem;font-weight:900;color:var(--p);text-decoration:none;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:8px}
+.logo-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--p),var(--pd));border-radius:10px;display:grid;place-items:center;font-size:1rem}
+.nav-search{flex:1;display:flex;max-width:420px;position:relative}
+.nav-search input{flex:1;padding:9px 14px 9px 38px;border:1.5px solid var(--bdr);border-radius:12px;font-family:var(--fb);font-size:.86rem;background:var(--bg);color:var(--text);outline:none;transition:border-color .22s}
+.nav-search input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(22,163,74,.12)}
+.si{position:absolute;left:12px;top:50%;transform:translateY(-50%);opacity:.38;font-size:.88rem}
+.nav-search button{padding:9px 16px;background:var(--p);color:#fff;border:none;border-radius:0 12px 12px 0;font-family:var(--fb);font-weight:700;font-size:.83rem;cursor:pointer;margin-left:-3px}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:8px;flex-shrink:0}
+.ibtn{width:38px;height:38px;border:1.5px solid var(--bdr);border-radius:11px;background:var(--bg);color:var(--text);font-size:.95rem;cursor:pointer;display:grid;place-items:center;position:relative;transition:all .22s}
+.ibtn:hover{background:var(--pl);border-color:var(--p);transform:translateY(-1px)}
+.cbadge{position:absolute;top:-5px;right:-5px;background:#ef4444;color:#fff;font-size:.55rem;font-weight:800;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--surf)}
+.ndot{position:absolute;top:-3px;right:-3px;width:9px;height:9px;border-radius:50%;background:#ef4444;border:2px solid var(--surf);display:none}.ndot.on{display:block}
+.aibtn{padding:8px 18px;background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff;border:none;border-radius:12px;font-family:var(--fb);font-weight:700;font-size:.84rem;cursor:pointer;white-space:nowrap;box-shadow:0 4px 16px rgba(124,58,237,.3);transition:transform .22s}
+.aibtn:hover{transform:translateY(-2px)}
+.user-pill{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 5px;border:1.5px solid var(--bdr);border-radius:50px;cursor:pointer;transition:all .22s;background:var(--bg)}
+.user-pill:hover{border-color:var(--p);background:var(--pl)}
+.user-av{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--p),#0d9488);display:grid;place-items:center;color:#fff;font-size:.75rem;font-weight:800}
+.user-pill span{font-size:.82rem;font-weight:700}
+
+/* SIDEBAR */
+.sidebar{position:fixed;top:var(--nav);left:0;width:var(--sw);height:calc(100vh - var(--nav));background:var(--surf);border-right:1px solid var(--bdr);padding:14px 10px;display:flex;flex-direction:column;gap:1px;overflow-y:auto;z-index:400;transition:transform .3s ease}
+.sidebar.collapsed{transform:translateX(calc(-1 * var(--sw)))}
+.ssec{font-family:var(--fh);font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);padding:14px 12px 5px}
+.nitem{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:12px;cursor:pointer;font-size:.88rem;font-weight:600;color:var(--muted);text-decoration:none;transition:all .22s;user-select:none}
+.nitem:hover{background:var(--pl);color:var(--p)}
+.nitem.act{background:linear-gradient(135deg,var(--pl),rgba(22,163,74,.06));color:var(--p);border:1px solid rgba(22,163,74,.18)}
+.ni{width:32px;height:32px;border-radius:9px;background:var(--bg);display:grid;place-items:center;font-size:.95rem;flex-shrink:0}
+.nitem.act .ni,.nitem:hover .ni{background:var(--pl)}
+.sidebar-footer{margin-top:auto;padding:12px 0 0;border-top:1px solid var(--bdr)}
+
+/* MAIN */
+.main{margin-top:var(--nav);margin-left:var(--sw);min-height:calc(100vh - var(--nav));padding:24px;transition:margin-left .3s ease}
+.main.expanded{margin-left:0}
+
+/* BANNER */
+.banner{border-radius:22px;padding:28px 32px;display:flex;justify-content:space-between;align-items:center;color:#fff;margin-bottom:20px;overflow:hidden;position:relative;background:linear-gradient(135deg,var(--p),#0d9488 60%,#059669);box-shadow:0 8px 32px rgba(22,163,74,.28)}
+.banner::before{content:'';position:absolute;top:-60px;right:260px;width:200px;height:200px;background:rgba(255,255,255,.07);border-radius:50%}
+.btxt .greet{display:inline-flex;align-items:center;gap:6px;font-size:.75rem;font-weight:700;opacity:.8;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;background:rgba(255,255,255,.15);padding:4px 12px;border-radius:50px}
+.btxt h2{font-family:var(--fh);font-size:clamp(1.3rem,2.5vw,1.9rem);font-weight:800;margin-bottom:8px;line-height:1.2}
+.btxt p{font-size:.88rem;opacity:.82;margin-bottom:16px;max-width:380px}
+.banner-acts{display:flex;gap:10px;flex-wrap:wrap}
+.sbtn{padding:10px 22px;background:#fff;color:var(--p);border:none;border-radius:12px;font-family:var(--fb);font-weight:700;font-size:.86rem;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.15);transition:transform .22s}
+.sbtn:hover{transform:translateY(-2px)}
+.sbtn2{padding:10px 22px;background:rgba(255,255,255,.18);color:#fff;border:1.5px solid rgba(255,255,255,.35);border-radius:12px;font-family:var(--fb);font-weight:700;font-size:.86rem;cursor:pointer;backdrop-filter:blur(4px)}
+.bimg{width:190px;height:140px;border-radius:16px;object-fit:cover;box-shadow:0 10px 32px rgba(0,0,0,.25);flex-shrink:0;border:3px solid rgba(255,255,255,.2)}
+
+/* AGE SUGGESTION BANNER */
+.age-tip{display:none;align-items:flex-start;gap:14px;padding:16px 20px;border-radius:18px;margin-bottom:18px;border:2px solid;}
+.age-tip.show{display:flex}
+.age-tip.child-tip{background:linear-gradient(135deg,rgba(52,211,153,.15),rgba(110,231,183,.1));border-color:#6ee7b7;color:var(--text)}
+.age-tip.teen-tip{background:linear-gradient(135deg,rgba(59,130,246,.12),rgba(147,197,253,.08));border-color:#93c5fd;color:var(--text)}
+.age-tip.adult-tip{background:linear-gradient(135deg,rgba(245,158,11,.15),rgba(252,211,77,.08));border-color:#fcd34d;color:var(--text)}
+.age-tip.senior-tip{background:linear-gradient(135deg,rgba(167,139,250,.15),rgba(216,180,254,.08));border-color:#d8b4fe;color:var(--text)}
+.at-ico{font-size:2.2rem;flex-shrink:0}
+.at-body{flex:1}
+.at-title{font-family:var(--fh);font-size:1rem;font-weight:800;margin-bottom:5px;color:inherit}
+.at-sub{font-size:.83rem;line-height:1.65;margin-bottom:10px;color:var(--muted)}
+body.dark .at-sub{color:var(--muted)}
+.at-goal{padding:4px 12px;border-radius:50px;font-size:.75rem;font-weight:700;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.15)}
+body:not(.dark) .at-goal{background:rgba(0,0,0,.07);border:1px solid rgba(0,0,0,.1)}
+.at-goals{display:flex;gap:8px;flex-wrap:wrap}
+.at-goal{padding:4px 12px;border-radius:50px;font-size:.75rem;font-weight:700;background:rgba(255,255,255,.7)}
+.at-foods{margin-top:10px}
+.at-foods-title{font-size:.73rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px;opacity:.7}
+.at-food-chips{display:flex;gap:7px;flex-wrap:wrap}
+.at-food-chip{padding:5px 12px;background:rgba(255,255,255,.8);border-radius:8px;font-size:.76rem;font-weight:700;cursor:pointer;transition:all .22s;border:1.5px solid rgba(0,0,0,.08)}
+.at-food-chip:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.1)}
+.at-dismiss{background:none;border:none;cursor:pointer;font-size:1.1rem;flex-shrink:0;opacity:.4;padding:2px}
+.at-dismiss:hover{opacity:1}
+
+/* QUICK BAR */
+.qbar{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.qbtn{display:flex;align-items:center;gap:8px;padding:10px 18px;background:var(--surf);border:1.5px solid var(--bdr);border-radius:14px;cursor:pointer;font-family:var(--fb);font-size:.83rem;font-weight:700;color:var(--text);transition:all .22s;box-shadow:var(--sh)}
+.qbtn:hover{border-color:var(--p);color:var(--p);background:var(--pl);transform:translateY(-2px);box-shadow:var(--sh2)}
+.qi{width:28px;height:28px;border-radius:8px;background:var(--pl);display:grid;place-items:center;font-size:.9rem;flex-shrink:0}
+
+/* STATS */
+.srow{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px}
+.scard{background:var(--surf);border:1.5px solid var(--bdr);border-radius:var(--r);padding:18px;display:flex;align-items:flex-start;gap:14px;box-shadow:var(--sh);transition:all .22s;cursor:pointer}
+.scard:hover{transform:translateY(-3px);box-shadow:var(--sh2)}
+.sico{width:46px;height:46px;border-radius:13px;display:grid;place-items:center;font-size:1.3rem;flex-shrink:0}
+.sval{font-family:var(--fh);font-size:1.5rem;font-weight:800;line-height:1.1}
+.slbl{font-size:.73rem;color:var(--muted);font-weight:600;margin-top:2px}
+.strend{font-size:.70rem;font-weight:700;margin-top:4px}
+.strend.up{color:#16a34a}.strend.dn{color:#ef4444}
+
+/* SECTION */
+.shdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.shdr h3{font-family:var(--fh);font-size:1.15rem;font-weight:700}
+.seeall{font-size:.8rem;color:var(--p);font-weight:700;background:none;border:none;cursor:pointer;padding:5px 12px;border-radius:8px;transition:background .22s}
+.seeall:hover{background:var(--pl)}
+.fchips{display:flex;gap:7px;margin-bottom:14px;flex-wrap:wrap}
+.fc{padding:6px 14px;border:1.5px solid var(--bdr);border-radius:50px;font-size:.78rem;font-weight:700;cursor:pointer;background:var(--surf);color:var(--muted);transition:all .22s}
+.fc:hover{border-color:var(--p);color:var(--p)}.fc.on{background:var(--p);border-color:var(--p);color:#fff;box-shadow:0 4px 12px rgba(22,163,74,.25)}
+
+/* RECIPE GRID */
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:14px;margin-bottom:24px}
+.rcard{background:var(--surf);border:1.5px solid var(--bdr);border-radius:var(--r);overflow:hidden;cursor:pointer;box-shadow:var(--sh);transition:transform .22s,box-shadow .22s;position:relative}
+.rcard:hover{transform:translateY(-5px);box-shadow:0 16px 40px rgba(0,0,0,.12)}
+.rthumb{width:100%;height:118px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative;overflow:hidden;background:linear-gradient(135deg,var(--pl),rgba(22,163,74,.08))}
+.rthumb-emoji{transition:transform .22s}.rcard:hover .rthumb-emoji{transform:scale(1.15) rotate(-3deg)}
+.rfav{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.92);border:none;border-radius:50%;width:30px;height:30px;display:grid;place-items:center;font-size:.85rem;cursor:pointer;transition:transform .22s;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+.rfav:hover{transform:scale(1.2)}.rfav.liked{background:#fee2e2}
+.rtime-badge{position:absolute;bottom:8px;left:8px;background:rgba(0,0,0,.6);color:#fff;font-size:.64rem;font-weight:700;padding:3px 8px;border-radius:6px}
+.rinfo{padding:12px}.rinfo h4{font-weight:700;font-size:.88rem;margin-bottom:5px;color:var(--text);line-height:1.3}
+.rmeta{display:flex;align-items:center;justify-content:space-between;font-size:.73rem;color:var(--muted);margin-bottom:3px}
+.rbadge{padding:3px 9px;border-radius:50px;font-size:.65rem;font-weight:700;background:var(--pl);color:var(--p)}
+.rbadge.nv{background:#fee2e2;color:#dc2626}.rbadge.eg{background:#fef3c7;color:#d97706}.rbadge.jn{background:#ede9fe;color:#7c3aed}
+.rstars{font-size:.7rem;color:var(--acc)}
+
+/* PANELS */
+.bpanels{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px}
+.pcard{background:var(--surf);border:1.5px solid var(--bdr);border-radius:var(--r);padding:20px;box-shadow:var(--sh);transition:background .22s}
+.pcard h3{font-family:var(--fh);font-size:1.05rem;font-weight:700;margin-bottom:14px}
+.ginput{display:flex;gap:8px;margin-bottom:12px}
+.ginput input{flex:1;padding:9px 13px;border:1.5px solid var(--bdr);border-radius:11px;font-family:var(--fb);font-size:.84rem;background:var(--bg);color:var(--text);outline:none;transition:border-color .22s}
+.ginput input:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(22,163,74,.1)}
+.ginput button{padding:9px 14px;background:var(--p);color:#fff;border:none;border-radius:11px;font-size:1.1rem;font-weight:700;cursor:pointer;transition:background .22s}.ginput button:hover{background:var(--pd)}
+.glist{list-style:none;display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto}
+.gitem{display:flex;align-items:center;gap:9px;padding:8px 12px;background:var(--bg);border-radius:10px;font-size:.84rem;transition:background .22s;border:1px solid transparent}
+.gitem:hover{border-color:var(--bdr)}
+.gitem input[type=checkbox]{accent-color:var(--p);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.gitem.done label{text-decoration:line-through;color:var(--muted)}.gitem label{flex:1;cursor:pointer}
+.gitem .dx{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.84rem;opacity:.4;transition:all .22s;padding:2px 5px;border-radius:5px}
+.gitem .dx:hover{opacity:1;color:#ef4444;background:#fee2e2}
+.nbars{display:flex;flex-direction:column;gap:12px}
+.nrow .nhdr{display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;margin-bottom:5px}
+.nhdr span:last-child{color:var(--muted);font-weight:600}
+.nbar{width:100%;height:7px;background:var(--bdr);border-radius:8px;overflow:hidden}
+.nfill{height:100%;border-radius:8px;transition:width 1.2s cubic-bezier(.34,1.56,.64,1)}
+
+/* CALORIE TRACKER */
+.cal-ring-wrap{display:flex;align-items:center;gap:24px;margin-bottom:16px;flex-wrap:wrap}
+.cal-ring{position:relative;width:130px;height:130px;flex-shrink:0}
+.cal-ring svg{transform:rotate(-90deg)}
+.cr-bg{fill:none;stroke:var(--bdr);stroke-width:12}
+.cr-fill{fill:none;stroke:var(--p);stroke-width:12;stroke-linecap:round;transition:stroke-dashoffset 1.2s ease}
+.cal-ring-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cal-ring-val{font-family:var(--fh);font-size:1.3rem;font-weight:800}
+.cal-ring-lbl{font-size:.66rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+.cal-macros{display:flex;flex-direction:column;gap:10px;flex:1}
+.cmacro-hdr{display:flex;justify-content:space-between;font-size:.8rem;font-weight:700;margin-bottom:4px}
+.cmacro-bar{width:100%;height:7px;background:var(--bdr);border-radius:8px;overflow:hidden}
+.cmacro-fill{height:100%;border-radius:8px;transition:width 1.2s ease}
+.cal-log-btns{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.clbtn{padding:7px 14px;border:1.5px solid var(--bdr);border-radius:10px;font-family:var(--fb);font-size:.78rem;font-weight:700;cursor:pointer;background:var(--surf);color:var(--text);transition:all .22s}
+.clbtn:hover{border-color:var(--p);background:var(--pl);color:var(--p)}
+.age-cal-banner{border-radius:14px;padding:12px 16px;margin-bottom:16px;font-size:.83rem;line-height:1.6;border:1.5px solid}
+.age-cal-banner .acb-title{font-family:var(--fh);font-size:.9rem;font-weight:800;margin-bottom:4px}
+
+/* MEAL PLANNER */
+.meal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:10px;margin-bottom:22px}
+.mday{background:var(--surf);border:1.5px solid var(--bdr);border-radius:14px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .22s;box-shadow:var(--sh)}
+.mday:hover{border-color:var(--p);transform:translateY(-2px)}.mday.today{border-color:var(--p);background:var(--pl)}
+.mday-name{font-family:var(--fh);font-size:.64rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:5px}
+.mday-date{font-family:var(--fh);font-size:1.2rem;font-weight:800;margin-bottom:7px}.mday.today .mday-date{color:var(--p)}
+.mday-meals{display:flex;flex-direction:column;gap:3px}
+.mmeal{font-size:.62rem;font-weight:700;background:var(--bg);border-radius:5px;padding:3px 5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid transparent}
+.mmeal.filled{background:var(--pl);color:var(--p);border-color:rgba(22,163,74,.2)}
+
+/* HYDRATION */
+.hydrow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.gbtn{font-size:1.6rem;cursor:pointer;background:none;border:none;opacity:.22;transition:all .22s;filter:grayscale(1);transform:scale(.9)}
+.gbtn.filled{opacity:1;filter:none;transform:scale(1)}.gbtn:hover{transform:scale(1.12)}
+.hydration-progress{margin-top:14px;height:6px;background:var(--bdr);border-radius:6px;overflow:hidden}
+.hp-fill{height:100%;background:linear-gradient(90deg,#2563eb,#38bdf8);border-radius:6px;transition:width 1s ease}
+
+/* ACTIVITY */
+.actlist{display:flex;flex-direction:column;gap:8px}
+.aitem{display:flex;align-items:center;gap:12px;padding:12px 14px;background:var(--bg);border-radius:13px;font-size:.84rem;transition:all .22s;border:1px solid transparent}
+.aitem:hover{border-color:var(--bdr);background:var(--surf)}
+.aico{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;font-size:1rem;flex-shrink:0}
+.atitle{font-weight:700;font-size:.85rem}.atime{font-size:.72rem;color:var(--muted);margin-top:1px}
+.aright{margin-left:auto;font-size:.78rem;color:var(--p);font-weight:700;background:var(--pl);padding:4px 10px;border-radius:8px;white-space:nowrap}
+
+/* FAVOURITES */
+.favgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(188px,1fr));gap:14px;margin-bottom:24px}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .esi{font-size:3.5rem;margin-bottom:10px;display:block;opacity:.4}
+.empty-state p{font-size:.9rem;margin-bottom:14px}
+.empty-state button{padding:10px 22px;background:var(--p);color:#fff;border:none;border-radius:12px;font-family:var(--fb);font-weight:700;cursor:pointer}
+
+/* SHOPPING LIST */
+.shop-cat{margin-bottom:16px}
+.shop-cat-hdr{display:flex;align-items:center;gap:8px;font-size:.75rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);padding:6px 0;border-bottom:1px solid var(--bdr);margin-bottom:8px}
+.shop-item{display:flex;align-items:center;gap:10px;padding:9px 12px;background:var(--bg);border-radius:10px;margin-bottom:6px;font-size:.84rem;border:1px solid transparent;transition:all .22s}
+.shop-item:hover{border-color:var(--bdr)}
+.shop-item input[type=checkbox]{accent-color:var(--p);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.shop-item.done label{text-decoration:line-through;color:var(--muted)}.shop-item label{flex:1;cursor:pointer;font-weight:600}
+.shop-item .siprice{font-size:.78rem;font-weight:700;color:var(--p);white-space:nowrap}
+.shop-item .dx{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.84rem;opacity:.4;transition:all .22s;padding:2px 5px;border-radius:5px}
+.shop-item .dx:hover{opacity:1;color:#ef4444;background:#fee2e2}
+.shop-total-row{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:var(--pl);border-radius:12px;font-weight:700;font-size:.9rem;border:1.5px solid rgba(22,163,74,.2)}
+.st-lbl{color:var(--muted);font-size:.8rem}.st-val{font-family:var(--fh);font-size:1.1rem;color:var(--p)}
+
+/* SLIDE PANELS */
+.pov{position:fixed;inset:0;background:rgba(0,0,0,.35);backdrop-filter:blur(3px);z-index:600;display:none;opacity:0;transition:opacity .22s}.pov.on{display:block;opacity:1}
+.spanel{position:fixed;top:0;right:-440px;width:380px;height:100%;background:var(--surf);padding:28px 22px;box-shadow:-12px 0 40px rgba(0,0,0,.15);z-index:601;overflow-y:auto;transition:right .32s cubic-bezier(.34,1.06,.64,1);display:flex;flex-direction:column}.spanel.on{right:0}
+.spanel h2{font-family:var(--fh);font-size:1.3rem;font-weight:800;margin-bottom:18px}
+.pavt{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--p),#0d9488);display:flex;align-items:center;justify-content:center;font-family:var(--fh);font-size:1.9rem;font-weight:800;color:#fff;margin:0 auto 20px}
+.pff{margin-bottom:13px}
+.pff label{display:block;font-size:.70rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin-bottom:5px}
+.pff input,.pff select{width:100%;padding:10px 13px;border:1.5px solid var(--bdr);border-radius:12px;font-family:var(--fb);font-size:.87rem;background:var(--bg);color:var(--text);outline:none;transition:border-color .22s;-webkit-appearance:none;appearance:none}
+.pff input:focus,.pff select:focus{border-color:var(--p);box-shadow:0 0 0 3px rgba(22,163,74,.1)}
+.savebtn{width:100%;padding:13px;margin-top:6px;background:linear-gradient(135deg,var(--p),#0d9488);color:#fff;border:none;border-radius:14px;font-family:var(--fb);font-weight:700;font-size:.92rem;cursor:pointer;transition:transform .22s;box-shadow:0 6px 20px rgba(22,163,74,.3)}.savebtn:hover{transform:translateY(-2px)}
+.closelnk{display:block;text-align:center;margin-top:12px;color:var(--muted);font-size:.84rem;font-weight:700;cursor:pointer;background:none;border:none;width:100%;padding:8px;border-radius:10px;transition:all .22s}.closelnk:hover{background:var(--bg);color:#ef4444}
+
+/* CART — Smart sections */
+.cart-topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.cart-count-lbl{font-size:.8rem;color:var(--muted);font-weight:700;background:var(--bg);padding:4px 10px;border-radius:8px}
+.cart-section-hdr{font-size:.70rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:8px 0 6px;display:flex;align-items:center;gap:6px;border-bottom:1px solid var(--bdr);margin-bottom:8px;margin-top:6px}
+.csh-ico{width:20px;height:20px;border-radius:5px;display:grid;place-items:center;font-size:.75rem}
+.csh-count{margin-left:auto;background:var(--bg);padding:2px 7px;border-radius:6px;font-size:.68rem}
+.citem{display:flex;align-items:center;gap:10px;padding:11px 12px;background:var(--bg);border-radius:13px;margin-bottom:8px;border:1px solid transparent;transition:border-color .22s}
+.citem:hover{border-color:var(--bdr)}.citem.pantry-item{border-left:3px solid var(--acc)}
+.cico{font-size:1.4rem;flex-shrink:0;width:36px;text-align:center}
+.cdetail{flex:1;min-width:0}.cname{font-weight:700;font-size:.87rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.cmeta{font-size:.72rem;color:var(--muted)}
+.cpkg-tag{font-size:.68rem;font-weight:700;color:var(--acc);background:#fef3c7;padding:1px 7px;border-radius:4px;margin-top:2px;display:inline-block}
+.cqty{display:flex;align-items:center;gap:5px}
+.cqbtn{width:26px;height:26px;border-radius:8px;border:1.5px solid var(--bdr);background:var(--surf);color:var(--text);cursor:pointer;font-weight:700;font-size:.95rem;display:grid;place-items:center;transition:all .22s}
+.cqbtn:hover{background:var(--p);color:#fff;border-color:var(--p)}
+.cqval{font-size:.84rem;font-weight:800;min-width:22px;text-align:center}
+.cprice{font-weight:800;color:var(--p);font-size:.9rem;white-space:nowrap}
+.cdel{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;opacity:.4;transition:all .22s;padding:4px;border-radius:6px}.cdel:hover{opacity:1;color:#ef4444;background:#fee2e2}
+.cart-summary{background:var(--bg);border-radius:14px;padding:14px 16px;margin:8px 0;border:1.5px solid var(--bdr)}
+.csr{display:flex;justify-content:space-between;font-size:.84rem;margin-bottom:7px}
+.csr span:first-child{color:var(--muted);font-weight:600}
+.csr.total{font-weight:800;font-size:1.05rem;border-top:1.5px solid var(--bdr);padding-top:10px;margin-top:10px;margin-bottom:0}
+.csr.total span:last-child{color:var(--p);font-family:var(--fh)}
+.ckbtn{width:100%;padding:13px;margin-top:12px;background:linear-gradient(135deg,var(--p),#0d9488);color:#fff;border:none;border-radius:14px;font-family:var(--fb);font-weight:700;font-size:.91rem;cursor:pointer;transition:transform .22s;box-shadow:0 6px 20px rgba(22,163,74,.3)}.ckbtn:hover{transform:translateY(-2px)}
+.cart-empty{text-align:center;padding:36px 0;color:var(--muted);font-size:.9rem;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cart-empty .ce-ico{font-size:3.5rem;margin-bottom:10px;display:block;opacity:.5}
+
+/* NOTIFICATIONS */
+.notif-list{display:flex;flex-direction:column;gap:9px}
+.ni-item{display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--bg);border-radius:13px;transition:background .22s;border:1.5px solid transparent}
+.ni-item.unread{border-color:rgba(22,163,74,.2);background:var(--pl)}
+.ni-ico{font-size:1.3rem;flex-shrink:0;width:36px;height:36px;background:var(--surf);border-radius:10px;display:grid;place-items:center}
+.ni-title{font-weight:700;font-size:.85rem}.ni-sub{font-size:.75rem;color:var(--muted);margin-top:1px}
+.ni-time{font-size:.69rem;color:var(--muted);margin-left:auto;white-space:nowrap}
+.mark-all{font-size:.79rem;color:var(--p);font-weight:700;background:var(--pl);border:none;cursor:pointer;padding:6px 14px;border-radius:9px;margin-bottom:12px;transition:background .22s}.mark-all:hover{background:rgba(22,163,74,.2)}
+
+/* ════════════════════════════════════════════
+   AI RECIPE GENERATOR — FINAL CLEAN CSS
+════════════════════════════════════════════ */
+
+/* Overlay */
+.aiov{position:fixed;inset:0;z-index:700;display:none;align-items:center;justify-content:center;padding:16px;background:rgba(2,6,10,.78);backdrop-filter:blur(20px) saturate(160%)}
+.aiov.on{display:flex;animation:aiovIn .22s ease}
+@keyframes aiovIn{from{opacity:0}to{opacity:1}}
+
+/* Panel */
+.aipanel{
+  width:100%;max-width:880px;max-height:93vh;
+  background:var(--surf);border-radius:26px;
+  display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.07);
+  animation:panelIn .38s cubic-bezier(.34,1.06,.64,1);
+}
+@keyframes panelIn{from{opacity:0;transform:translateY(52px) scale(.93)}to{opacity:1;transform:none}}
+
+/* Header */
+.ai-hdr{flex-shrink:0;overflow:hidden;position:relative;background:linear-gradient(130deg,#150028 0%,#3b0764 22%,#5b21b6 48%,#7c3aed 68%,#a855f7 85%,#e879f9 100%);padding:0}
+.ai-hdr::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 90% at 78% 50%,rgba(255,255,255,.13),transparent);pointer-events:none}
+.ai-hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3) 50%,transparent)}
+.ai-hdr-inner{padding:16px 22px;display:flex;align-items:center;gap:12px;position:relative;z-index:1}
+.ai-hdr-icon{width:42px;height:42px;border-radius:12px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.24);display:grid;place-items:center;font-size:1.25rem;flex-shrink:0;backdrop-filter:blur(8px)}
+.ai-hdr-text{flex:1;min-width:0}
+.ai-hdr-text h3{font-family:var(--fh);font-size:1.08rem;font-weight:900;color:#fff;margin:0 0 1px;letter-spacing:-.15px}
+.ai-hdr-text p{font-size:.71rem;color:rgba(255,255,255,.62);margin:0}
+.ai-live{display:flex;align-items:center;gap:5px;font-size:.68rem;font-weight:700;color:rgba(255,255,255,.9);background:rgba(34,197,94,.22);border:1px solid rgba(34,197,94,.4);padding:3px 10px;border-radius:50px;flex-shrink:0;white-space:nowrap}
+.ai-live::before{content:'';width:5px;height:5px;background:#4ade80;border-radius:50%;animation:livePulse 2s ease infinite}
+@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.4}}
+.aicx{width:32px;height:32px;border-radius:50%;cursor:pointer;border:1px solid rgba(255,255,255,.2);background:rgba(255,255,255,.1);color:#fff;font-size:.9rem;display:grid;place-items:center;transition:all .22s;flex-shrink:0}
+.aicx:hover{background:rgba(255,255,255,.26);transform:rotate(90deg) scale(1.08)}
+
+/* Tabs */
+.ai-tabs{display:flex;flex-shrink:0;background:var(--surf);border-bottom:1px solid var(--bdr);padding:0 6px;gap:1px;transition:background .22s,border-color .22s}
+.ai-tab{flex:1;padding:11px 4px 9px;display:flex;align-items:center;justify-content:center;gap:5px;font-family:var(--fh);font-size:.78rem;font-weight:700;color:var(--muted);cursor:pointer;border-bottom:3px solid transparent;border-radius:8px 8px 0 0;transition:all .2s;white-space:nowrap;user-select:none}
+.ai-tab .t-ico{font-size:.9rem}
+.ai-tab:hover{color:var(--text);background:rgba(124,58,237,.06)}
+.ai-tab.on{color:#7c3aed;border-bottom-color:#7c3aed;background:linear-gradient(180deg,rgba(124,58,237,.07),transparent)}
+
+/* Body */
+.ai-body{flex:1;overflow-y:auto;scroll-behavior:smooth}
+.ai-body::-webkit-scrollbar{width:4px}
+.ai-body::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:4px}
+.ai-tc{display:none;padding:20px}.ai-tc.on{display:block}
+
+/* Suggest bar */
+.ai-suggest-bar{display:flex;align-items:flex-start;gap:10px;padding:11px 15px;border-radius:13px;margin-bottom:16px;background:linear-gradient(135deg,rgba(124,58,237,.09),rgba(168,85,247,.04));border:1.5px solid rgba(124,58,237,.2);font-size:.81rem;line-height:1.55}
+.asb-ico{font-size:1.05rem;flex-shrink:0;margin-top:1px}
+.asb-txt{color:var(--text);font-weight:500}
+.asb-txt strong{color:#7c3aed;font-weight:700}
+body.dark .asb-txt{color:var(--text)}
+
+/* Form */
+.gen-form{display:flex;flex-direction:column;gap:14px}
+.gen-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.gen-field{display:flex;flex-direction:column;gap:5px}
+.gen-field label{font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.gen-field input,.gen-field select{width:100%;padding:10px 13px;border:1.5px solid var(--bdr);border-radius:12px;font-family:var(--fb);font-size:.87rem;background:var(--bg);color:var(--text);outline:none;transition:all .2s;-webkit-appearance:none;appearance:none}
+.gen-field input::placeholder{color:var(--muted)}
+.gen-field input:focus,.gen-field select:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.13);background:var(--surf)}
+body.dark .gen-field input,body.dark .gen-field select{background:var(--bg);color:var(--text);border-color:var(--bdr)}
+
+/* Spice */
+.spice-wrap{display:flex;flex-direction:column;gap:7px}
+.spice-track input[type=range]{width:100%;-webkit-appearance:none;height:7px;border-radius:7px;background:linear-gradient(90deg,#22c55e,#84cc16,#eab308,#ef4444,#dc2626);outline:none;cursor:pointer}
+.spice-track input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;background:#fff;border:3px solid #7c3aed;box-shadow:0 2px 10px rgba(124,58,237,.4);cursor:pointer;transition:transform .2s}
+.spice-track input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.22)}
+.spice-labels{display:flex;justify-content:space-between;font-size:.63rem;color:var(--muted);font-weight:700}
+.spice-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;border-radius:50px;font-size:.78rem;font-weight:700;background:var(--bg);border:1.5px solid var(--bdr);width:fit-content;transition:all .2s}
+
+/* People counter */
+.ppl-counter{display:flex;align-items:center;gap:10px}
+.pplbtn{width:34px;height:34px;border-radius:10px;border:1.5px solid var(--bdr);background:var(--surf);color:var(--text);font-size:1.1rem;font-weight:700;cursor:pointer;display:grid;place-items:center;transition:all .2s}
+.pplbtn:hover{border-color:#7c3aed;color:#7c3aed;background:rgba(124,58,237,.08);transform:scale(1.1)}
+.pplval{font-family:var(--fh);font-size:1.5rem;font-weight:800;min-width:28px;text-align:center}
+
+/* Presets */
+.preset-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:2px}
+.preset-chip{padding:6px 13px;border:1.5px solid var(--bdr);border-radius:50px;font-size:.74rem;font-weight:700;cursor:pointer;background:var(--surf);color:var(--muted);transition:all .2s;white-space:nowrap;user-select:none}
+.preset-chip:hover{border-color:#7c3aed;color:#7c3aed;background:rgba(124,58,237,.07);transform:translateY(-1px)}
+.preset-chip.active{background:#7c3aed;border-color:#7c3aed;color:#fff;box-shadow:0 3px 12px rgba(124,58,237,.35)}
+
+/* Generate button */
+.gen-btn{width:100%;padding:14px;background:linear-gradient(135deg,#4c1d95,#6d28d9,#7c3aed,#9333ea);background-size:200% 200%;animation:gbShift 4s ease infinite alternate;color:#fff;border:none;border-radius:14px;font-family:var(--fh);font-weight:700;font-size:.97rem;cursor:pointer;box-shadow:0 6px 24px rgba(124,58,237,.42);transition:transform .2s,box-shadow .2s,opacity .2s;display:flex;align-items:center;justify-content:center;gap:9px;position:relative;overflow:hidden}
+.gen-btn::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.12),transparent);transition:left .5s}
+.gen-btn:hover{transform:translateY(-2px);box-shadow:0 10px 32px rgba(124,58,237,.52)}.gen-btn:hover::after{left:100%}
+.gen-btn:active{transform:translateY(0)}
+.gen-btn.busy{opacity:.68;pointer-events:none}
+@keyframes gbShift{0%{background-position:0% 50%}100%{background-position:100% 50%}}
+.gen-spinner{width:17px;height:17px;border-radius:50%;border:2.5px solid rgba(255,255,255,.3);border-top-color:#fff;animation:spinA .7s linear infinite;flex-shrink:0}
+@keyframes spinA{to{transform:rotate(360deg)}}
+
+/* Result card */
+.result-card{background:var(--bg);border:1.5px solid var(--bdr);border-radius:20px;margin-top:16px;overflow:hidden;display:none;box-shadow:0 4px 18px rgba(0,0,0,.06)}
+.result-card.on{display:block;animation:rcIn .42s cubic-bezier(.34,1.06,.64,1)}
+@keyframes rcIn{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+
+/* Result header */
+.rh{padding:17px 20px;background:linear-gradient(135deg,#134e4a,#1a6b55,#16a34a);color:#fff;position:relative;overflow:hidden}
+.rh::before{content:'';position:absolute;top:-40px;right:-40px;width:130px;height:130px;background:rgba(255,255,255,.08);border-radius:50%}
+.rh-row1{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:9px;position:relative;z-index:1}
+.rh-title{font-family:var(--fh);font-size:1.18rem;font-weight:900;color:#fff;flex:1;padding-right:10px;line-height:1.25}
+.rh-cal{font-size:.72rem;font-weight:700;background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);padding:4px 11px;border-radius:50px;white-space:nowrap;flex-shrink:0}
+.result-tags{display:flex;gap:6px;flex-wrap:wrap;position:relative;z-index:1}
+.rtag{background:rgba(255,255,255,.16);color:#fff;padding:3px 9px;border-radius:50px;font-size:.69rem;font-weight:700;border:1px solid rgba(255,255,255,.24)}
+
+/* Result body */
+.result-body{padding:18px}
+.serving-note{display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:12px;margin-bottom:16px;background:rgba(124,58,237,.08);border:1.5px solid rgba(124,58,237,.2);font-size:.81rem;font-weight:600;color:#7c3aed;line-height:1.5}
+body.dark .serving-note{background:rgba(124,58,237,.14);border-color:rgba(124,58,237,.3);color:#c084fc}
+
+/* Ingredient section labels */
+.ingr-sec-lbl{font-size:.67rem;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);padding:9px 0 7px;display:flex;align-items:center;gap:7px;border-bottom:2px solid var(--bdr);margin-bottom:10px}
+.isl-badge{padding:2px 8px;border-radius:6px;font-size:.62rem;font-weight:800}
+.isl-badge.fresh{background:#dcfce7;color:#15803d}
+.isl-badge.pantry{background:#fef3c7;color:#a16207}
+body.dark .isl-badge.fresh{background:rgba(22,163,74,.2);color:#4ade80}
+body.dark .isl-badge.pantry{background:rgba(245,158,11,.2);color:#fbbf24}
+
+.ingr-hdr-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.ingr-hdr-row h4{font-family:var(--fh);font-size:.9rem;font-weight:800}
+.sel-all-btn{display:flex;align-items:center;gap:6px;font-size:.73rem;font-weight:700;color:var(--muted);cursor:pointer;padding:5px 11px;border:1.5px solid var(--bdr);border-radius:9px;transition:all .2s;white-space:nowrap}
+.sel-all-btn:hover{border-color:var(--p);color:var(--p);background:var(--pl)}
+.sel-all-btn input{accent-color:#7c3aed;width:13px;height:13px;cursor:pointer}
+
+/* Ingredient cards */
+.ingr-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+.ingr-card{display:flex;align-items:center;gap:9px;padding:10px 12px;background:var(--surf);border-radius:12px;border:1.5px solid var(--bdr);cursor:pointer;transition:all .2s;position:relative}
+.ingr-card:hover{border-color:rgba(124,58,237,.4);transform:translateY(-1px);box-shadow:0 3px 10px rgba(124,58,237,.1)}
+.ingr-card.checked{border-color:var(--p);background:linear-gradient(135deg,var(--pl),rgba(22,163,74,.02))}
+.ingr-card.pantry-card{border-style:dashed;border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.03)}
+.ingr-card.pantry-card.checked{border-style:solid;border-color:var(--acc);background:rgba(245,158,11,.08)}
+.ingr-card input[type=checkbox]{accent-color:var(--p);width:15px;height:15px;cursor:pointer;flex-shrink:0}
+.ingr-card.pantry-card input[type=checkbox]{accent-color:var(--acc)}
+.ingr-emoji{font-size:1.3rem;flex-shrink:0;width:34px;height:34px;background:var(--bg);border-radius:9px;display:grid;place-items:center;border:1px solid var(--bdr)}
+.ingr-info{flex:1;min-width:0}
+.ingr-name{font-weight:700;font-size:.82rem;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ingr-qty{font-size:.71rem;color:var(--muted);margin-top:1px}
+.ingr-price{font-size:.74rem;font-weight:800;color:var(--p);white-space:nowrap;flex-shrink:0}
+.ingr-card.pantry-card .ingr-price{color:var(--acc)}
+.pkg-tag{font-size:.64rem;font-weight:700;color:var(--acc);background:rgba(245,158,11,.12);padding:1px 6px;border-radius:5px;margin-top:2px;display:inline-block;border:1px solid rgba(245,158,11,.25)}
+body.dark .pkg-tag{color:#fbbf24;background:rgba(245,158,11,.16)}
+
+/* Pantry notice */
+.pantry-notice{background:rgba(245,158,11,.07);border:1.5px solid rgba(245,158,11,.26);border-radius:12px;padding:11px 14px;margin-bottom:13px;font-size:.8rem;line-height:1.65;color:var(--text)}
+.pantry-notice strong{display:block;font-weight:800;color:#d97706;margin-bottom:3px;font-family:var(--fh);font-size:.84rem}
+body.dark .pantry-notice{background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.28)}
+body.dark .pantry-notice strong{color:#fbbf24}
+
+/* Cost bar */
+.cost-bar{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:12px;margin-bottom:14px;background:var(--surf);border:1.5px solid var(--bdr)}
+.cost-left .cost-lbl{font-size:.75rem;color:var(--muted);font-weight:600}
+.cost-left .cost-per{font-size:.71rem;color:var(--muted);margin-top:1px}
+.cost-val{font-family:var(--fh);font-size:1.22rem;font-weight:900;color:var(--p)}
+
+/* Cart buttons */
+.cart-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.add-all-btn{padding:13px;background:linear-gradient(135deg,var(--p),#0d9488);color:#fff;border:none;border-radius:13px;font-family:var(--fb);font-weight:700;font-size:.9rem;cursor:pointer;box-shadow:0 5px 18px rgba(22,163,74,.32);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.add-all-btn:hover{transform:translateY(-2px);box-shadow:0 8px 26px rgba(22,163,74,.44)}
+.add-sel-btn{padding:13px;background:var(--bg);color:var(--p);border:2px solid var(--p);border-radius:13px;font-family:var(--fb);font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.add-sel-btn:hover{background:var(--p);color:#fff;transform:translateY(-2px)}
+
+/* Steps */
+.steps-hdr{font-family:var(--fh);font-size:.93rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+.step-item{display:flex;gap:11px;padding:11px 13px;background:var(--surf);border-radius:12px;margin-bottom:8px;font-size:.83rem;line-height:1.7;border:1px solid var(--bdr);transition:border-color .2s}
+.step-item:hover{border-color:rgba(124,58,237,.22)}
+.step-num{width:26px;height:26px;border-radius:50%;flex-shrink:0;margin-top:2px;background:linear-gradient(135deg,#5b21b6,#9333ea);color:#fff;font-size:.68rem;font-weight:800;display:grid;place-items:center;box-shadow:0 2px 8px rgba(124,58,237,.32)}
+
+/* Nutrition */
+.recipe-nutrition{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:14px 0}
+.rnut-item{background:var(--surf);border:1.5px solid var(--bdr);border-radius:12px;padding:10px;text-align:center;transition:all .2s}
+.rnut-item:hover{border-color:var(--p);transform:translateY(-2px)}
+.rnut-val{font-family:var(--fh);font-size:1rem;font-weight:900;color:var(--text)}
+.rnut-lbl{font-size:.61rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+
+/* Tips */
+.tips-box{background:rgba(245,158,11,.08);border-radius:13px;padding:13px 16px;border:1.5px solid rgba(245,158,11,.28);display:none;margin-top:13px}
+.tips-box.on{display:block;animation:rcIn .3s ease}
+.tips-hdr{font-family:var(--fh);font-size:.84rem;font-weight:800;color:#d97706;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.tips-box p{font-size:.81rem;color:var(--text);line-height:1.75;opacity:.92}
+body.dark .tips-box{background:rgba(245,158,11,.09);border-color:rgba(245,158,11,.26)}
+body.dark .tips-hdr{color:#fbbf24}
+
+/* ── CHAT ── */
+.chat-wrap{display:flex;flex-direction:column;height:460px}
+.quick-prmt{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:12px}
+.qp{padding:7px 13px;border:1.5px solid var(--bdr);border-radius:50px;font-size:.74rem;font-weight:700;cursor:pointer;background:var(--surf);color:var(--text);transition:all .2s;white-space:nowrap}
+.qp:hover{border-color:#7c3aed;color:#7c3aed;background:rgba(124,58,237,.07);transform:translateY(-1px)}
+.chatmsgs{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;margin-bottom:12px;padding-right:3px}
+.chatmsgs::-webkit-scrollbar{width:3px}
+.chatmsgs::-webkit-scrollbar-thumb{background:var(--bdr);border-radius:3px}
+.cmsg{max-width:88%;padding:11px 15px;border-radius:16px;font-size:.84rem;line-height:1.7;animation:rcIn .25s ease}
+.cmsg.bot{background:var(--bg);align-self:flex-start;border-bottom-left-radius:4px;border:1.5px solid var(--bdr);color:var(--text)}
+.cmsg.user{background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;align-self:flex-end;border-bottom-right-radius:4px;box-shadow:0 3px 14px rgba(124,58,237,.3)}
+.chatbar{display:flex;gap:8px;flex-shrink:0}
+.chatbar input{flex:1;padding:10px 14px;border:1.5px solid var(--bdr);border-radius:12px;font-family:var(--fb);font-size:.84rem;background:var(--bg);color:var(--text);outline:none;transition:all .2s}
+.chatbar input::placeholder{color:var(--muted)}
+.chatbar input:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.12);background:var(--surf)}
+.chatsend{padding:10px 17px;background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;border:none;border-radius:12px;font-weight:800;cursor:pointer;font-size:1rem;transition:all .2s;box-shadow:0 3px 12px rgba(124,58,237,.28)}
+.chatsend:hover{transform:translateY(-2px) scale(1.06)}
+.typing-dots{display:flex;gap:4px;align-items:center;padding:2px 0}
+.typing-dots span{width:7px;height:7px;background:var(--muted);border-radius:50%;animation:tdot .8s ease infinite}
+.typing-dots span:nth-child(2){animation-delay:.15s}.typing-dots span:nth-child(3){animation-delay:.3s}
+@keyframes tdot{0%,80%,100%{transform:scale(1)}40%{transform:scale(1.5)}}
+
+/* ── AGE SUGGESTIONS ── */
+.ast-intro{background:linear-gradient(135deg,rgba(124,58,237,.08),rgba(236,72,153,.04));border:1.5px solid rgba(124,58,237,.17);border-radius:13px;padding:12px 16px;margin-bottom:16px;font-size:.82rem;color:var(--text);line-height:1.6}
+.ast-intro strong{font-family:var(--fh);color:#7c3aed;display:block;margin-bottom:3px}
+body.dark .ast-intro{background:rgba(124,58,237,.11);border-color:rgba(124,58,237,.24)}
+body.dark .ast-intro strong{color:#c084fc}
+.ast-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+.ast-card{background:var(--surf);border:2px solid var(--bdr);border-radius:16px;padding:15px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
+.ast-card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(0,0,0,.1)}
+.ast-card.selected{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.14)}
+.ast-card-ico{font-size:1.8rem;margin-bottom:7px;display:block}
+.ast-card-title{font-family:var(--fh);font-size:.86rem;font-weight:800;margin-bottom:3px;color:var(--text)}
+.ast-card-sub{font-size:.73rem;color:var(--muted);line-height:1.5}
+.ast-dishes-hdr{font-family:var(--fh);font-size:.88rem;font-weight:800;margin-bottom:11px;color:var(--text);display:flex;align-items:center;gap:7px}
+.ast-dishes{display:flex;flex-direction:column;gap:8px}
+.ast-dish-row{display:flex;align-items:center;gap:11px;padding:11px 13px;background:var(--surf);border-radius:12px;cursor:pointer;border:1.5px solid var(--bdr);transition:all .2s}
+.ast-dish-row:hover{border-color:rgba(22,163,74,.4);background:var(--pl);transform:translateX(4px)}
+.ast-dish-ico{font-size:1.4rem;flex-shrink:0}
+.ast-dish-info{flex:1;min-width:0}
+.ast-dish-name{font-weight:700;font-size:.84rem;color:var(--text)}
+.ast-dish-sub{font-size:.72rem;color:var(--muted);margin-top:1px}
+.ast-dish-tag{font-size:.63rem;font-weight:700;padding:2px 8px;border-radius:50px;background:var(--pl);color:var(--p);white-space:nowrap;flex-shrink:0;border:1px solid rgba(22,163,74,.2)}
+.ast-dish-btn{padding:7px 14px;background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;border:none;border-radius:9px;font-family:var(--fb);font-weight:700;font-size:.74rem;cursor:pointer;transition:all .2s;white-space:nowrap;flex-shrink:0}
+.ast-dish-btn:hover{transform:scale(1.06);box-shadow:0 4px 12px rgba(124,58,237,.36)}
+
+/* ── FIND / FILTER ── */
+.sf-row{display:flex;gap:9px;margin-bottom:13px;flex-wrap:wrap}
+.sf-input{flex:1;min-width:130px;padding:10px 13px;border:1.5px solid var(--bdr);border-radius:12px;font-family:var(--fb);font-size:.84rem;background:var(--bg);color:var(--text);outline:none;transition:all .2s}
+.sf-input::placeholder{color:var(--muted)}
+.sf-input:focus{border-color:#7c3aed;box-shadow:0 0 0 3px rgba(124,58,237,.11)}
+.sf-select{padding:10px 13px;border:1.5px solid var(--bdr);border-radius:12px;font-family:var(--fb);font-size:.83rem;background:var(--bg);color:var(--text);outline:none;cursor:pointer;-webkit-appearance:none;appearance:none;transition:all .2s}
+.sf-select:focus{border-color:#7c3aed}
+.sf-results{display:grid;grid-template-columns:1fr 1fr;gap:9px;max-height:380px;overflow-y:auto}
+.sf-card{background:var(--surf);border:1.5px solid var(--bdr);border-radius:13px;padding:12px;cursor:pointer;transition:all .2s}
+.sf-card:hover{border-color:var(--p);transform:translateY(-2px);box-shadow:var(--sh2)}
+.sf-card-top{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.sf-card-ico{font-size:1.45rem}
+.sf-card-name{font-weight:700;font-size:.83rem;font-family:var(--fh);color:var(--text)}
+.sf-card-meta{display:flex;gap:6px;flex-wrap:wrap}
+.sf-meta-tag{font-size:.63rem;font-weight:700;padding:2px 7px;border-radius:50px}
+.sf-meta-tag.diet{background:var(--pl);color:var(--p)}
+.sf-meta-tag.time{background:rgba(59,130,246,.1);color:#2563eb}
+.sf-meta-tag.cal{background:rgba(239,68,68,.09);color:#dc2626}
+.sf-no-results{text-align:center;padding:30px;color:var(--muted);font-size:.88rem;grid-column:1/-1}
+
+/* ── TODAY'S MEAL ── */
+.mtw-header{background:linear-gradient(135deg,var(--p),#0d9488);border-radius:16px;padding:15px 18px;color:#fff;margin-bottom:14px}
+.mtw-title{font-family:var(--fh);font-size:1rem;font-weight:800;margin-bottom:3px}
+.mtw-sub{font-size:.76rem;opacity:.82}
+.mtw-slots{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.mtw-slot{background:var(--surf);border:1.5px solid var(--bdr);border-radius:13px;padding:13px;transition:all .2s}
+.mtw-slot:hover{border-color:var(--p);transform:translateY(-2px)}
+.mtw-slot-lbl{font-size:.66rem;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:7px}
+.mtw-dish-ico{font-size:1.5rem;margin-bottom:5px}
+.mtw-dish-name{font-weight:700;font-size:.83rem;color:var(--text);margin-bottom:2px;font-family:var(--fh);line-height:1.35}
+.mtw-dish-cal{font-size:.71rem;color:var(--muted)}
+.mtw-gen-btn{width:100%;margin-top:8px;padding:7px;background:var(--bg);border:1.5px solid var(--bdr);border-radius:9px;font-family:var(--fb);font-size:.75rem;font-weight:700;cursor:pointer;color:var(--muted);transition:all .2s}
+.mtw-gen-btn:hover{background:var(--p);color:#fff;border-color:var(--p)}
+.mtw-total{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;background:var(--pl);border-radius:11px;font-size:.84rem;font-weight:700;border:1.5px solid rgba(22,163,74,.2);margin-bottom:12px}
+.mtw-total-lbl{color:var(--muted);font-weight:600}
+.mtw-total-val{font-family:var(--fh);font-size:1rem;color:var(--p)}
+.mtw-regen{width:100%;padding:12px;background:linear-gradient(135deg,var(--p),#0d9488);color:#fff;border:none;border-radius:13px;font-family:var(--fb);font-weight:700;font-size:.9rem;cursor:pointer;transition:all .2s;box-shadow:0 4px 14px rgba(22,163,74,.32)}
+.mtw-regen:hover{transform:translateY(-2px);box-shadow:0 7px 20px rgba(22,163,74,.42)}
+
+/* Responsive */
+@media(max-width:700px){
+  .aipanel{max-width:100%;border-radius:22px 22px 0 0;max-height:96vh}
+  .aiov{padding:0;align-items:flex-end}
+  .gen-row{grid-template-columns:1fr}
+  .ingr-grid{grid-template-columns:1fr}
+  .cart-btns{grid-template-columns:1fr}
+  .recipe-nutrition{grid-template-columns:1fr 1fr}
+  .ast-grid{grid-template-columns:1fr 1fr}
+  .mtw-slots{grid-template-columns:1fr}
+  .sf-results{grid-template-columns:1fr}
+  .ai-tab{font-size:.72rem;padding:10px 3px}
+}
+
+
+/* ── Dark mode extra fixes ── */
+body.dark .at-sub{color:var(--muted)}
+body.dark .at-goal{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12)}
+body.dark .age-tip.child-tip .at-title,
+body.dark .age-tip.teen-tip .at-title,
+body.dark .age-tip.adult-tip .at-title,
+body.dark .age-tip.senior-tip .at-title{color:var(--text)}
+body.dark .at-food-chip{background:rgba(255,255,255,.1);color:var(--text);border-color:rgba(255,255,255,.12)}
+body.dark .rnut-val{color:var(--text)}
+body.dark .ingr-name{color:var(--text)}
+body.dark .sf-card-name{color:var(--text)}
+body.dark .ast-card-title{color:var(--text)}
+body.dark .ast-dish-name{color:var(--text)}
+body.dark .mtw-dish-name{color:var(--text)}
+body.dark .cost-val{color:var(--p)}
+body.dark .cmsg.bot{background:var(--bg);border-color:var(--bdr);color:var(--text)}
+
+/* ══ RECIPE MODAL ══ */
+.modov{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(6px);z-index:800;display:none;align-items:center;justify-content:center;padding:20px}
+.modov.on{display:flex}
+.modbox{background:var(--surf);border-radius:22px;width:100%;max-width:520px;max-height:85vh;overflow-y:auto;box-shadow:0 28px 60px rgba(0,0,0,.25);border:1px solid var(--bdr)}
+.mthumb{width:100%;height:160px;display:flex;align-items:center;justify-content:center;font-size:4.5rem;background:linear-gradient(135deg,var(--pl),rgba(22,163,74,.06));border-radius:22px 22px 0 0}
+.mbody{padding:20px}
+.mbody h2{font-family:var(--fh);font-size:1.4rem;font-weight:800;margin-bottom:10px;color:var(--text)}
+.mtags{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.mtag{padding:4px 12px;border-radius:50px;font-size:.72rem;font-weight:700;background:var(--bg);color:var(--p);border:1px solid var(--bdr)}
+.mdesc{font-size:.85rem;color:var(--muted);line-height:1.7}
+.mingr{margin-top:14px}
+.mingr h4{font-family:var(--fh);font-weight:800;font-size:.9rem;margin-bottom:8px;color:var(--text)}
+.mingr ul{list-style:none;display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.mingr li{display:flex;align-items:center;gap:7px;font-size:.82rem;color:var(--muted);padding:6px 10px;background:var(--bg);border-radius:9px}
+.mingr li::before{content:'✓';color:var(--p);font-weight:800;flex-shrink:0}
+.msteps{margin-top:14px}
+.msteps h4{font-family:var(--fh);font-weight:800;font-size:.9rem;margin-bottom:8px;color:var(--text)}
+.mstep-row{display:flex;gap:10px;padding:9px 11px;margin-bottom:6px;background:var(--bg);border-radius:11px;font-size:.83rem;line-height:1.6;border:1px solid var(--bdr)}
+.mstep-n{width:24px;height:24px;border-radius:50%;background:var(--p);color:#fff;font-size:.70rem;font-weight:800;display:grid;place-items:center;flex-shrink:0}
+.mbtns{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.mbtn{flex:1;padding:11px;border:none;border-radius:13px;font-family:var(--fb);font-weight:700;font-size:.86rem;cursor:pointer;transition:transform .22s;min-width:90px}
+.mbtn:hover{transform:translateY(-2px)}
+.mbtn.ai{background:linear-gradient(135deg,#7c3aed,#9333ea);color:#fff}
+.mbtn.fv{background:#fee2e2;color:#dc2626}
+.mbtn.cl{background:var(--bg);color:var(--text);border:1.5px solid var(--bdr)}
+.mbtn.gr{background:linear-gradient(135deg,var(--p),#0d9488);color:#fff}
+/* ══ TIMER ══ */
+.timerbar{position:fixed;bottom:24px;right:24px;background:var(--surf);border:1.5px solid var(--bdr);border-radius:18px;padding:14px 18px;box-shadow:0 10px 36px rgba(0,0,0,.15);z-index:450;display:none;align-items:center;gap:14px}
+.timerbar.on{display:flex}
+.tdisp{font-family:var(--fh);font-size:1.6rem;font-weight:800;color:var(--p);min-width:62px}
+.tlbl{font-size:.75rem;color:var(--muted);font-weight:700}
+.tbtns{display:flex;gap:6px}
+.tbtn{padding:7px 12px;border-radius:10px;border:none;font-family:var(--fb);font-weight:700;font-size:.78rem;cursor:pointer;transition:all .22s}
+.tbtn.go{background:var(--p);color:#fff}.tbtn.go:hover{background:var(--pd)}
+.tbtn.st{background:#ef4444;color:#fff}
+.tbtn.cx{background:var(--bg);color:var(--muted);border:1px solid var(--bdr)}.tbtn.cx:hover{background:#fee2e2;color:#ef4444}
+/* ══ RESPONSIVE ══ */
+@media(max-width:1100px){.srow{grid-template-columns:1fr 1fr}.meal-days{grid-template-columns:repeat(4,1fr)}}
+@media(max-width:860px){.bpanels{grid-template-columns:1fr}.bimg{width:150px;height:112px}}
+@media(max-width:700px){
+  .sidebar{transform:translateX(calc(-1 * var(--sw)))}.sidebar.mob{transform:translateX(0)}
+  .main{margin-left:0!important}.banner{flex-direction:column;gap:14px}.bimg{width:100%;height:160px}
+  .srow{grid-template-columns:1fr 1fr}.meal-days{grid-template-columns:repeat(3,1fr)}.nav-search{max-width:180px}
+  .mingr ul{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body id="body">
+
+<nav class="navbar">
+  <a class="nav-logo" href="#"><div class="logo-icon">🍳</div>AI Cooking</a>
+  <button class="ibtn" onclick="toggleSidebar()">☰</button>
+  <div class="nav-search">
+    <span class="si">🔍</span>
+    <input type="text" id="sinp" placeholder="Search recipes, ingredients…" onkeydown="if(event.key==='Enter')doSearch()">
+    <button onclick="doSearch()">Search</button>
+  </div>
+  <div class="nav-right">
+    <button class="ibtn" id="dkbtn" onclick="toggleDark()" title="Dark mode">🌙</button>
+    <button class="ibtn" onclick="openNotif()">🔔<div class="ndot on" id="ndot"></div></button>
+    <button class="aibtn" onclick="openAI()">✨ AI Recipe</button>
+    <div class="user-pill" onclick="openProfile()">
+      <div class="user-av" id="navAv">C</div>
+      <span id="navName">Chef</span>
+    </div>
+    <button class="ibtn" onclick="openCart()">🛒<span class="cbadge" id="cbadge">0</span></button>
+  </div>
+</nav>
+
+<aside class="sidebar" id="sidebar">
+  <span class="ssec">Main</span>
+  <a class="nitem act" onclick="setAct(this);showSec('home')">   <span class="ni">🏠</span>Dashboard</a>
+  <a class="nitem"     onclick="setAct(this);showSec('recipes')"><span class="ni">🍽️</span>Recipes</a>
+  <a class="nitem"     onclick="setAct(this);showSec('planner')"><span class="ni">📅</span>Meal Planner</a>
+  <span class="ssec">Health</span>
+  <a class="nitem" onclick="setAct(this);showSec('cal')">      <span class="ni">🔥</span>Calorie Tracker</a>
+  <a class="nitem" onclick="setAct(this);showSec('diet')">     <span class="ni">🥗</span>Diet Tracker</a>
+  <a class="nitem" onclick="setAct(this);showSec('nutri')">    <span class="ni">📊</span>Nutrition</a>
+  <a class="nitem" onclick="setAct(this);showSec('hydro')">    <span class="ni">💧</span>Hydration</a>
+  <span class="ssec">Library</span>
+  <a class="nitem" onclick="setAct(this);showSec('favs')">     <span class="ni">❤️</span>Favourites</a>
+  <span class="ssec">Shopping</span>
+  <a class="nitem" onclick="setAct(this);showSec('groc')">     <span class="ni">🛒</span>Shopping List</a>
+  <a class="nitem" onclick="setAct(this);showSec('activity')"> <span class="ni">⚡</span>Activity</a>
+  <div class="sidebar-footer">
+    <a class="nitem" onclick="openProfile()"><span class="ni">👤</span>Profile</a>
+    <a class="nitem" onclick="logout()">     <span class="ni">🚪</span>Logout</a>
+  </div>
+</aside>
+
+<main class="main" id="main">
+
+  <div id="bannerWrap">
+    <div class="banner">
+      <div class="btxt">
+        <div class="greet" id="wuser">👋 Welcome back!</div>
+        <h2>Ready to Cook Something<br>Amazing Today?</h2>
+        <p id="dinfo">Personalised recipes and meal plans crafted just for you.</p>
+        <div class="banner-acts">
+          <button class="sbtn" onclick="openAI()">✨ Generate Recipe</button>
+          <button class="sbtn2" onclick="openCart()">🛒 View Cart</button>
+        </div>
+      </div>
+      <img src="https://images.unsplash.com/photo-1542838132-92c53300491e?w=600&q=80" class="bimg" alt="Fresh produce">
+    </div>
+
+    <!-- AGE SUGGESTION BANNER — dynamically shown -->
+    <div class="age-tip" id="ageTip">
+      <div class="at-ico" id="atIco">💡</div>
+      <div class="at-body">
+        <div class="at-title" id="atTitle">Nutrition Tips</div>
+        <div class="at-sub" id="atSub"></div>
+        <div class="at-goals" id="atGoals"></div>
+        <div class="at-foods" id="atFoodsWrap" style="display:none">
+          <div class="at-foods-title">Quick Log — tap to log food:</div>
+          <div class="at-food-chips" id="atFoodChips"></div>
+        </div>
+      </div>
+      <button class="at-dismiss" onclick="document.getElementById('ageTip').classList.remove('show')">✕</button>
+    </div>
+
+    <div class="qbar">
+      <button class="qbtn" onclick="openAI()"><span class="qi">✨</span>AI Recipe Generator</button>
+      <button class="qbtn" onclick="startTimer(10*60,'Cooking Timer')"><span class="qi">⏱️</span>Start Timer</button>
+      <button class="qbtn" onclick="showSec('planner');setAct(document.querySelectorAll('.nitem')[2])"><span class="qi">📅</span>Meal Planner</button>
+      <button class="qbtn" onclick="showSec('groc');setAct(document.querySelectorAll('.nitem')[8])"><span class="qi">🛒</span>Shopping List</button>
+      <button class="qbtn" onclick="showSec('hydro');setAct(document.querySelectorAll('.nitem')[6])"><span class="qi">💧</span>Log Water</button>
+    </div>
+
+    <div class="srow">
+      <div class="scard" onclick="showSec('favs');setAct(document.querySelectorAll('.nitem')[7])">
+        <div class="sico" style="background:#dcfce7">🍽️</div>
+        <div><div class="sval" id="sv-r">24</div><div class="slbl">Recipes Saved</div><div class="strend up">↑ 3 this week</div></div>
+      </div>
+      <div class="scard" onclick="showSec('cal');setAct(document.querySelectorAll('.nitem')[3])">
+        <div class="sico" style="background:#fef3c7">🔥</div>
+        <div><div class="sval" id="sv-cal">0</div><div class="slbl">Calories Today</div><div class="strend dn" id="calTrendLbl">↓ Log a meal</div></div>
+      </div>
+      <div class="scard" onclick="showSec('diet');setAct(document.querySelectorAll('.nitem')[4])">
+        <div class="sico" style="background:#ede9fe">✅</div>
+        <div><div class="sval">7</div><div class="slbl">Meals This Week</div><div class="strend up">↑ On track</div></div>
+      </div>
+      <div class="scard" onclick="showSec('hydro');setAct(document.querySelectorAll('.nitem')[6])">
+        <div class="sico" style="background:#dbeafe">💧</div>
+        <div><div class="sval" id="sv-w">6/8</div><div class="slbl">Water Glasses</div><div class="strend up">↑ 75% of goal</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="sec-home">
+    <div class="shdr"><h3>Suggested For You</h3><button class="seeall" onclick="showSec('recipes');setAct(document.querySelectorAll('.nitem')[1])">See all →</button></div>
+    <div class="fchips" id="fc1"></div>
+    <div class="rgrid" id="rg1"></div>
+    <div class="bpanels">
+      <div class="pcard"><h3>🛒 Quick Grocery Add</h3>
+        <div class="ginput"><input id="gi1" placeholder="Add grocery item…" onkeydown="if(event.key==='Enter')addG1()"><button onclick="addG1()">+</button></div>
+        <ul class="glist" id="gl1"></ul>
+      </div>
+      <div class="pcard"><h3>📊 Today's Nutrition</h3><div class="nbars" id="nb1"></div></div>
+    </div>
+  </div>
+
+  <!-- RECIPES -->
+  <div id="sec-recipes" style="display:none">
+    <div class="shdr"><h3>All Recipes</h3><span id="recipe-count" style="font-size:.8rem;color:var(--muted);font-weight:700"></span></div>
+    <div class="fchips" id="fc2"></div>
+    <div class="rgrid" id="rg2"></div>
+  </div>
+
+  <!-- PLANNER -->
+  <div id="sec-planner" style="display:none">
+    <div class="shdr"><h3>📅 Weekly Meal Planner</h3></div>
+    <div class="meal-days" id="mdays"></div>
+  </div>
+
+  <!-- CALORIE TRACKER -->
+  <div id="sec-cal" style="display:none">
+    <div class="shdr"><h3>🔥 Calorie Tracker</h3><button class="seeall" onclick="resetCal()">Reset Day</button></div>
+    <div class="age-cal-banner" id="ageCalBanner"></div>
+    <div class="bpanels">
+      <div class="pcard">
+        <h3>Today's Progress</h3>
+        <div class="cal-ring-wrap">
+          <div class="cal-ring">
+            <svg width="130" height="130" viewBox="0 0 130 130">
+              <circle class="cr-bg" cx="65" cy="65" r="52"/>
+              <circle class="cr-fill" id="calCircle" cx="65" cy="65" r="52" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+            </svg>
+            <div class="cal-ring-txt">
+              <div class="cal-ring-val" id="calConsumed">0</div>
+              <div class="cal-ring-lbl" id="calGoalLbl">of 2000</div>
+            </div>
+          </div>
+          <div class="cal-macros">
+            <div><div class="cmacro-hdr"><span>Protein</span><span id="cm-p">0 / 60g</span></div><div class="cmacro-bar"><div class="cmacro-fill" id="cf-p" style="width:0%;background:#16a34a"></div></div></div>
+            <div style="margin-top:8px"><div class="cmacro-hdr"><span>Carbs</span><span id="cm-c">0 / 250g</span></div><div class="cmacro-bar"><div class="cmacro-fill" id="cf-c" style="width:0%;background:#f59e0b"></div></div></div>
+            <div style="margin-top:8px"><div class="cmacro-hdr"><span>Fat</span><span id="cm-f">0 / 65g</span></div><div class="cmacro-bar"><div class="cmacro-fill" id="cf-f" style="width:0%;background:#ef4444"></div></div></div>
+          </div>
+        </div>
+        <div class="cal-log-btns" id="calFoodBtns"></div>
+      </div>
+      <div class="pcard"><h3>📋 Today's Food Log</h3><ul class="glist" id="calfoodlog" style="max-height:340px"></ul></div>
+    </div>
+  </div>
+
+  <!-- DIET TRACKER -->
+  <div id="sec-diet" style="display:none">
+    <div class="shdr"><h3>🥗 Diet Tracker</h3></div>
+    <div class="bpanels">
+      <div class="pcard"><h3>Today's Meals</h3>
+        <div class="ginput"><input id="mli" placeholder="Log a meal… e.g. Poha 250 kcal" onkeydown="if(event.key==='Enter')logMeal()"><button onclick="logMeal()">+</button></div>
+        <ul class="glist" id="mllog"></ul>
+      </div>
+      <div class="pcard"><h3>📊 Nutrition Goals</h3><div class="nbars" id="nb2"></div></div>
+    </div>
+  </div>
+
+  <!-- NUTRITION -->
+  <div id="sec-nutri" style="display:none">
+    <div class="shdr"><h3>📊 Nutrition Details</h3></div>
+    <div class="bpanels">
+      <div class="pcard"><h3>Macro Breakdown</h3><div class="nbars" id="nb3"></div></div>
+      <div class="pcard"><h3>Vitamins &amp; Minerals</h3><div class="nbars" id="nb4"></div></div>
+    </div>
+  </div>
+
+  <!-- HYDRATION -->
+  <div id="sec-hydro" style="display:none">
+    <div class="shdr"><h3>💧 Hydration Tracker</h3></div>
+    <div class="pcard" style="max-width:520px"><h3>Today's Water Intake — Goal: 8 glasses</h3>
+      <div class="hydrow" id="hrow"></div>
+      <div class="hydration-progress" style="margin-top:14px"><div class="hp-fill" id="hpfill" style="width:0%"></div></div>
+      <p style="font-size:.85rem;font-weight:700;color:var(--p);margin-top:12px" id="htxt"></p>
+      <button onclick="resetH()" style="margin-top:12px;padding:8px 18px;border:1.5px solid var(--bdr);border-radius:10px;background:none;color:var(--muted);cursor:pointer;font-family:var(--fb);font-size:.83rem;font-weight:700">🔄 Reset</button>
+    </div>
+  </div>
+
+  <!-- FAVOURITES -->
+  <div id="sec-favs" style="display:none">
+    <div class="shdr"><h3>❤️ Favourite Recipes</h3><span id="fav-count" style="font-size:.8rem;color:var(--muted);font-weight:700"></span></div>
+    <div class="favgrid" id="favgrid"></div>
+    <div id="fav-empty" class="empty-state" style="display:none">
+      <span class="esi">❤️</span>
+      <p>No favourite recipes yet.<br>Tap the 🤍 on any recipe card to save it here.</p>
+      <button onclick="showSec('recipes');setAct(document.querySelectorAll('.nitem')[1])">Browse Recipes</button>
+    </div>
+  </div>
+
+  <!-- SHOPPING LIST -->
+  <div id="sec-groc" style="display:none">
+    <div class="shdr"><h3>🛒 Shopping List</h3><button class="seeall" onclick="clearDone()">Clear checked</button></div>
+    <div style="max-width:600px">
+      <div class="ginput" style="margin-bottom:16px"><input id="gi2" placeholder="Add item… e.g. Paneer 200g" onkeydown="if(event.key==='Enter')addG2()"><button onclick="addG2()">+</button></div>
+      <div id="shopListWrap"></div>
+      <div class="shop-total-row" id="shopTotalRow" style="display:none">
+        <div><span class="st-lbl">Estimated Total</span></div>
+        <span class="st-val" id="shopTotal">₹0</span>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:14px">
+        <button onclick="clearDone()" style="flex:1;padding:10px;border:1.5px solid var(--bdr);border-radius:11px;background:none;color:var(--muted);cursor:pointer;font-family:var(--fb);font-size:.83rem;font-weight:700">Clear Checked</button>
+        <button onclick="openCart()" style="flex:1;padding:10px;background:var(--p);color:#fff;border:none;border-radius:11px;cursor:pointer;font-family:var(--fb);font-size:.83rem;font-weight:700;box-shadow:0 4px 14px rgba(22,163,74,.3)">View Cart 🛒</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACTIVITY -->
+  <div id="sec-activity" style="display:none">
+    <div class="shdr"><h3>⚡ Recent Activity</h3></div>
+    <div class="pcard" style="max-width:580px"><div class="actlist" id="alist"></div></div>
+  </div>
+
+</main>
+
+<!-- PROFILE PANEL -->
+<div class="pov" id="pov1" onclick="closeProfile()"></div>
+<div class="spanel" id="ppanel">
+  <h2>My Profile</h2>
+  <div class="pavt" id="pavt">C</div>
+  <div class="pff"><label>Full Name</label><input id="pname" placeholder="Name"></div>
+  <div class="pff"><label>Age</label><input id="page" type="number" placeholder="Age" oninput="onAgeChange(this.value)"></div>
+  <div class="pff"><label>Email</label><input id="pemail" type="email" placeholder="Email"></div>
+  <div class="pff"><label>Phone</label><input id="pphone" placeholder="Phone"></div>
+  <div class="pff"><label>Location</label>
+    <select id="ploc"><option>Mathura</option><option>Noida</option><option>Delhi</option><option>Lucknow</option><option>Agra</option><option>Kanpur</option><option>Varanasi</option><option>Ghaziabad</option></select>
+  </div>
+  <div class="pff"><label>Diet Preference</label>
+    <select id="pdiet"><option value="veg">🥦 Vegetarian</option><option value="nonveg">🍗 Non-Vegetarian</option><option value="egg">🥚 Eggetarian</option><option value="jain">🪷 Jain</option></select>
+  </div>
+  <button class="savebtn" onclick="saveProfile()">💾 Save Changes</button>
+  <button class="closelnk" onclick="closeProfile()">✕ Close</button>
+</div>
+
+<!-- CART PANEL -->
+<div class="pov" id="pov2" onclick="closeCart()"></div>
+<div class="spanel" id="cpanel">
+  <div class="cart-topbar"><h2>🛒 My Cart</h2><span class="cart-count-lbl" id="cartCountLbl"></span></div>
+  <div id="cartBody"></div>
+  <div id="cartEmpty" class="cart-empty"><span class="ce-ico">🛒</span>Your cart is empty.<br><small style="margin-top:4px;display:block;opacity:.7">Generate an AI recipe to add fresh ingredients!</small></div>
+  <div id="cartFoot" style="display:none">
+    <div class="cart-summary" id="cartSummary"></div>
+    <button class="ckbtn" onclick="checkout()">🛍️ Checkout →</button>
+    <button onclick="clearCart()" style="width:100%;margin-top:8px;padding:10px;background:none;border:1.5px solid var(--bdr);border-radius:12px;font-family:var(--fb);font-weight:700;font-size:.84rem;color:var(--muted);cursor:pointer">🗑 Clear Cart</button>
+  </div>
+  <button class="closelnk" onclick="closeCart()">✕ Close</button>
+</div>
+
+<!-- NOTIFICATIONS -->
+<div class="pov" id="pov3" onclick="closeNotif()"></div>
+<div class="spanel" id="notifPanel">
+  <h2>🔔 Notifications</h2>
+  <button class="mark-all" onclick="markAllRead()">✓ Mark all as read</button>
+  <div class="notif-list" id="nlist"></div>
+</div>
+
+<!-- AI RECIPE GENERATOR -->
+<div class="aiov" id="aiov" onclick="handleAIOv(event)">
+ <div class="aipanel">
+
+  <!-- HEADER -->
+  <div class="ai-hdr">
+   <div class="ai-hdr-inner">
+    <div class="ai-hdr-icon">✨</div>
+    <div class="ai-hdr-text">
+     <h3>AI Recipe Generator</h3>
+     <p>Exact ingredients · Scaled by persons · Prices · Full instructions</p>
+    </div>
+    <div class="ai-status">AI Online</div>
+    <button class="aicx" onclick="closeAI()" title="Close">✕</button>
+   </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="ai-tabs">
+   <div class="ai-tab on" id="tabGen" onclick="switchAITab('gen',this)"><span class="t-ico">🍳</span>Generate</div>
+   <div class="ai-tab"    id="tabAge" onclick="switchAITab('age',this)"><span class="t-ico">🧒</span>Age Tips</div>
+   <div class="ai-tab"    id="tabFind" onclick="switchAITab('find',this)"><span class="t-ico">🔍</span>Find</div>
+   <div class="ai-tab"    id="tabToday" onclick="switchAITab('today',this)"><span class="t-ico">📅</span>Today</div>
+   <div class="ai-tab"    id="tabChat" onclick="switchAITab('chat',this)"><span class="t-ico">💬</span>Chat</div>
+  </div>
+
+  <div class="ai-body">
+
+   <!-- ═══ GENERATE TAB ═══ -->
+   <div class="ai-tc on" id="tc-gen">
+
+    <div class="ai-suggest-bar" id="aiSuggestBar">
+     <span class="asb-ico">💡</span>
+     <span class="asb-txt" id="aiSuggestTxt">Enter a dish name below — the AI will generate <strong>exact quantities, prices, steps and chef tips</strong>.</span>
+    </div>
+
+    <div class="gen-form">
+     <div class="gen-row">
+      <div class="gen-field">
+       <label>🍽️ Dish Name</label>
+       <input id="gDish" placeholder="e.g. Paneer Butter Masala" list="dishSugg" oninput="onDishInput()">
+       <datalist id="dishSugg">
+        <option>Paneer Butter Masala</option><option>Dal Tadka</option><option>Chicken Biryani</option>
+        <option>Egg Bhurji</option><option>Aloo Gobi</option><option>Butter Chicken</option>
+        <option>Palak Paneer</option><option>Khichdi</option><option>Veg Biryani</option>
+        <option>Mutton Curry</option><option>Rajma Chawal</option><option>Chole Bhature</option>
+        <option>Chicken Haleem</option><option>Fish Curry</option><option>Masala Dosa</option>
+        <option>Paneer Tikka</option><option>Saag Aloo</option><option>Masoor Dal Soup</option>
+        <option>Chicken Stew</option><option>Banana Oat Pancakes</option><option>Egg Fried Rice</option>
+        <option>Grilled Fish Tikka</option><option>Soft Dal Khichdi</option><option>Murgh Shorba</option>
+       </datalist>
+      </div>
+      <div class="gen-field">
+       <label>🥗 Diet Type</label>
+       <select id="gDiet">
+        <option value="Vegetarian">🥦 Vegetarian</option>
+        <option value="Non-Vegetarian">🍗 Non-Vegetarian</option>
+        <option value="Eggetarian">🥚 Eggetarian</option>
+        <option value="Jain">🪷 Jain (No Onion-Garlic)</option>
+        <option value="Vegan">🌱 Vegan</option>
+       </select>
+      </div>
+     </div>
+
+     <div class="gen-row">
+      <div class="gen-field">
+       <label>👨‍👩‍👧‍👦 Number of People</label>
+       <div class="ppl-counter">
+        <button class="pplbtn" onclick="changePpl(-1)">−</button>
+        <div class="pplval" id="pplval">2</div>
+        <button class="pplbtn" onclick="changePpl(1)">+</button>
+        <span style="font-size:.8rem;color:var(--muted);margin-left:5px;font-weight:600">persons</span>
+       </div>
+      </div>
+      <div class="gen-field">
+       <label>🌍 Cuisine Style</label>
+       <select id="gCuisine">
+        <option>North Indian</option><option>South Indian</option><option>Mughlai</option>
+        <option>Punjabi</option><option>Bengali</option><option>Gujarati</option>
+        <option>Chinese-Indian</option><option>Italian</option><option>Continental</option>
+       </select>
+      </div>
+     </div>
+
+     <div class="gen-field">
+      <label>🌶️ Spice Level</label>
+      <div class="spice-wrap">
+       <div class="spice-track"><input type="range" id="gSpice" min="1" max="5" value="3" oninput="updateSpice()"></div>
+       <div class="spice-labels"><span>😌 Mild</span><span>🙂 Light</span><span>😋 Medium</span><span>🥵 Hot</span><span>🔥 Extra Hot</span></div>
+       <div class="spice-badge" id="spiceBadge">😋 Medium Spice</div>
+      </div>
+     </div>
+
+     <div class="gen-row">
+      <div class="gen-field">
+       <label>⏱ Max Cook Time</label>
+       <select id="gTime"><option value="15">Under 15 min</option><option value="30" selected>Under 30 min</option><option value="45">Under 45 min</option><option value="60">Under 1 hour</option><option value="120">No limit</option></select>
+      </div>
+      <div class="gen-field">
+       <label>🎉 Occasion</label>
+       <select id="gOcc"><option>Everyday Meal</option><option>Party / Gathering</option><option>Festival Special</option><option>Quick Lunch</option><option>Date Night</option><option>Kid Friendly</option><option>Senior Friendly</option><option>Weight Loss</option></select>
+      </div>
+     </div>
+
+     <div class="gen-row">
+      <div class="gen-field"><label>❌ Avoid / Allergies</label><input id="gAvoid" placeholder="e.g. nuts, dairy, gluten"></div>
+      <div class="gen-field"><label>✅ Must-Use Ingredients</label><input id="gMust" placeholder="e.g. paneer, spinach"></div>
+     </div>
+
+     <div class="gen-field">
+      <label>⚡ Quick Presets</label>
+      <div class="preset-row">
+       <div class="preset-chip" onclick="applyPreset(this,'quick')">⚡ Under 20 min</div>
+       <div class="preset-chip" onclick="applyPreset(this,'healthy')">🥗 Low Calorie</div>
+       <div class="preset-chip" onclick="applyPreset(this,'highprotein')">💪 High Protein</div>
+       <div class="preset-chip" onclick="applyPreset(this,'comfort')">🤗 Comfort Food</div>
+       <div class="preset-chip" onclick="applyPreset(this,'kids')">🧒 Kids Friendly</div>
+       <div class="preset-chip" onclick="applyPreset(this,'senior')">🧓 Senior Friendly</div>
+      </div>
+     </div>
+
+     <button class="gen-btn" id="genBtn" onclick="generateRecipe()">
+      <span id="genBtnContent">✨ Generate Full Recipe</span>
+     </button>
+    </div>
+
+    <!-- RESULT -->
+    <div class="result-card" id="resultCard">
+     <div class="rh">
+      <div class="rh-row1">
+       <div class="rh-title" id="rTitle"></div>
+       <div class="rh-cal" id="rCalTag"></div>
+      </div>
+      <div class="result-tags" id="rTags"></div>
+     </div>
+     <div class="result-body">
+      <div class="serving-note"><span>👨‍👩‍👧‍👦</span><span id="servingText"></span></div>
+
+      <!-- Fresh -->
+      <div class="ingr-sec-lbl"><span>🛒</span>Fresh Ingredients<span class="isl-badge fresh">Add to Cart</span><span style="margin-left:auto;font-size:.7rem;color:var(--muted)" id="freshCount"></span></div>
+      <div class="ingr-hdr-row"><h4>Fresh Items</h4><label class="sel-all-btn"><input type="checkbox" id="chkFresh" onchange="toggleGroup(this,'fresh')" checked>Deselect all</label></div>
+      <div class="ingr-grid" id="freshGrid"></div>
+
+      <!-- Pantry -->
+      <div class="ingr-sec-lbl"><span>🫙</span>Pantry · Masalas · Oil · Salt<span class="isl-badge pantry">Full Pack Only</span><span style="margin-left:auto;font-size:.7rem;color:var(--muted)" id="pantryCount"></span></div>
+      <div class="pantry-notice">
+       <strong>ℹ️ Not pre-selected — most people already have these</strong>
+       If you need to buy any masala, oil, ghee or salt, you must buy the <b>whole pack</b>. Tick only what you actually need.
+      </div>
+      <div class="ingr-hdr-row"><h4>Pantry Items</h4><label class="sel-all-btn"><input type="checkbox" id="chkPantry" onchange="toggleGroup(this,'pantry')">Select all</label></div>
+      <div class="ingr-grid" id="pantryGrid"></div>
+
+      <!-- Cost + Buttons -->
+      <div class="cost-bar">
+       <div class="cost-left"><div class="cost-lbl">Fresh ingredients total</div><div class="cost-per" id="costPer"></div></div>
+       <div class="cost-val" id="costVal">₹—</div>
+      </div>
+      <div class="cart-btns">
+       <button class="add-all-btn" onclick="addFreshToCart()">🛒 Add Fresh Items to Cart</button>
+       <button class="add-sel-btn" onclick="addSelectedToCart()">☑️ Add Selected</button>
+      </div>
+
+      <!-- Steps -->
+      <div class="steps-hdr">📋 Step-by-Step Instructions</div>
+      <div id="stepsBody"></div>
+
+      <!-- Nutrition -->
+      <div class="recipe-nutrition" id="recipeNutrition"></div>
+
+      <!-- Tips -->
+      <div class="tips-box" id="tipsBox">
+       <div class="tips-hdr">💡 Chef's Tips</div>
+       <p id="tipsTxt"></p>
+      </div>
+     </div>
+    </div>
+   </div><!-- /tc-gen -->
+
+   <!-- ═══ AGE SUGGESTIONS TAB ═══ -->
+   <div class="ai-tc" id="tc-age">
+    <div class="ast-intro">
+     <strong>🧒 Personalised Age-Based Recommendations</strong>
+     Select your age group below to see dishes best suited for your nutritional needs. Suggestions adapt to your diet preference.
+    </div>
+    <div class="ast-grid">
+     <div class="ast-card" onclick="pickAgeGroup('child',this)">
+      <span class="ast-card-ico">🧒</span>
+      <div class="ast-card-title">Kids (1–12 yrs)</div>
+      <div class="ast-card-sub">Mild, calcium-rich, soft foods for growing children</div>
+     </div>
+     <div class="ast-card" onclick="pickAgeGroup('teen',this)">
+      <span class="ast-card-ico">🧑</span>
+      <div class="ast-card-title">Teens (13–19 yrs)</div>
+      <div class="ast-card-sub">High protein, iron-rich, energy meals for active teens</div>
+     </div>
+     <div class="ast-card" onclick="pickAgeGroup('adult',this)">
+      <span class="ast-card-ico">🧑‍💼</span>
+      <div class="ast-card-title">Adults (20–59 yrs)</div>
+      <div class="ast-card-sub">Balanced, heart-healthy, fibre-rich everyday meals</div>
+     </div>
+     <div class="ast-card" onclick="pickAgeGroup('senior',this)">
+      <span class="ast-card-ico">🧓</span>
+      <div class="ast-card-title">Seniors (60+ yrs)</div>
+      <div class="ast-card-sub">Soft, easy-to-chew, low-sodium: Haleem, shorba, khichdi</div>
+     </div>
+    </div>
+    <div id="astDishesWrap" style="display:none">
+     <div class="ast-dishes-hdr" id="astDishesHdr">🍽️ Recommended Dishes</div>
+     <div class="ast-dishes" id="astDishes"></div>
+    </div>
+   </div>
+
+   <!-- ═══ FIND / FILTER TAB ═══ -->
+   <div class="ai-tc" id="tc-find">
+    <div class="sf-row">
+     <input class="sf-input" id="sfSearch" placeholder="🔍 Search dishes, ingredients…" oninput="doAISearch()">
+     <select class="sf-select" id="sfDiet" onchange="doAISearch()">
+      <option value="">All Diets</option>
+      <option value="veg">🥦 Veg</option>
+      <option value="nonveg">🍗 Non-Veg</option>
+      <option value="egg">🥚 Egg</option>
+      <option value="jain">🪷 Jain</option>
+     </select>
+     <select class="sf-select" id="sfTime" onchange="doAISearch()">
+      <option value="">Any Time</option>
+      <option value="15">≤ 15 min</option>
+      <option value="30">≤ 30 min</option>
+      <option value="45">≤ 45 min</option>
+     </select>
+    </div>
+    <div class="sf-results" id="sfResults"></div>
+   </div>
+
+   <!-- ═══ TODAY'S MEAL TAB ═══ -->
+   <div class="ai-tc" id="tc-today">
+    <div class="meal-today-wrap">
+     <div class="mtw-header">
+      <div class="mtw-title">🌟 Today's Meal Plan</div>
+      <div class="mtw-sub" id="mtwDate"></div>
+     </div>
+     <div class="mtw-slots" id="mtwSlots"></div>
+     <div class="mtw-total">
+      <span class="mtw-total-lbl">Total Calories</span>
+      <span class="mtw-total-val" id="mtwTotalCal">0 kcal</span>
+     </div>
+     <button class="mtw-regen" onclick="genTodayMeal()">🔄 Suggest New Meal Plan</button>
+    </div>
+   </div>
+
+   <!-- ═══ CHAT TAB ═══ -->
+   <div class="ai-tc" id="tc-chat">
+    <div class="chat-wrap">
+     <div class="quick-prmt">
+      <div class="qp" onclick="sendChat('What can I cook with leftover rice?')">🍚 Leftover rice</div>
+      <div class="qp" onclick="sendChat('High protein vegetarian meal ideas?')">💪 High protein veg</div>
+      <div class="qp" onclick="sendChat('Quick breakfast under 10 minutes?')">⚡ Quick breakfast</div>
+      <div class="qp" onclick="sendChat('Soft foods for elderly people?')">🧓 Senior meals</div>
+      <div class="qp" onclick="sendChat('Healthy tiffin ideas for school kids?')">🧒 Kids tiffin</div>
+      <div class="qp" onclick="sendChat('Low calorie meals for weight loss?')">🥗 Weight loss</div>
+     </div>
+     <div class="chatmsgs" id="chatmsgs">
+      <div class="cmsg bot">👋 Hi! I'm your AI cooking assistant. Ask me anything — recipes, nutrition by age group, ingredient swaps, cooking tips, or meal ideas!</div>
+     </div>
+     <div class="chatbar">
+      <input id="chatinp" placeholder="Ask about recipes, nutrition, age-specific food…" onkeydown="if(event.key==='Enter')sendChat()">
+      <button class="chatsend" onclick="sendChat()">↗</button>
+     </div>
+    </div>
+   </div>
+
+  </div><!-- /ai-body -->
+ </div><!-- /aipanel -->
+</div>
+
+<!-- RECIPE MODAL -->
+<div class="modov" id="modov" onclick="handleModOv(event)"><div class="modbox" id="modbox"></div></div>
+
+<!-- TIMER -->
+<div class="timerbar" id="tbar">
+  <div><div class="tdisp" id="tdisp">10:00</div><div class="tlbl" id="tlbl">Cooking Timer</div></div>
+  <div class="tbtns">
+    <button class="tbtn go" id="tgobtn" onclick="toggleTimer()">Start</button>
+    <button class="tbtn st" onclick="resetTimerUI()">Reset</button>
+    <button class="tbtn cx" onclick="closeTimer()">✕</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   DIET COMPATIBILITY — STRICT RULES
+   ═══════════════════════════════════════════════════════
+   nonveg: can eat ALL (nonveg + veg + egg + jain)
+   egg:    can eat veg + egg + jain  (NO nonveg)
+   veg:    can eat veg + jain only   (NO egg, NO nonveg)
+   jain:   can eat jain only         (NO egg, NO veg, NO nonveg)
+*/
+const DIET_COMPAT = {
+  nonveg: ['nonveg','veg','egg','jain'],
+  egg:    ['veg','egg','jain'],
+  veg:    ['veg','jain'],
+  jain:   ['jain']
+};
+
+/* Filter chips shown per user diet */
+const DIET_CHIPS = {
+  nonveg: [{l:'All',f:''},{l:'🍗 Non-Veg',f:'nonveg'},{l:'🥦 Veg',f:'veg'},{l:'🥚 Egg',f:'egg'},{l:'🪷 Jain',f:'jain'},{l:'⚡ Quick',f:'easy'}],
+  egg:    [{l:'All',f:''},{l:'🥚 Egg',f:'egg'},{l:'🥦 Veg',f:'veg'},{l:'🪷 Jain',f:'jain'},{l:'⚡ Quick',f:'easy'}],
+  veg:    [{l:'All',f:''},{l:'🥦 Veg',f:'veg'},{l:'🪷 Jain',f:'jain'},{l:'⚡ Quick',f:'easy'}],
+  jain:   [{l:'🪷 Jain Only',f:'jain'},{l:'⚡ Quick',f:'easy'}]
+};
+
+/* ═══════════════════════════════════════════════════════
+   RECIPE DATABASE
+   diet tags are STRICTLY set — Dal Tadka is 'veg', never nonveg
+*/
+const RDB = [
+  {id:1, name:"Paneer Butter Masala", e:"🍛",t:"30 min",tm:30,c:"420 kcal",diet:"veg",   d:"Medium",stars:4.8,
+   desc:"Creamy tomato-based paneer curry, rich and aromatic. Perfect with naan or rice.",
+   ingredients:["200g paneer","3 tomatoes","1 onion","Butter 2 tbsp","Fresh cream 100ml","Cashews 20g","Ginger-garlic paste","Kashmiri chilli","Garam masala","Kasuri methi","Salt"],
+   steps:["Soak cashews, blend with tomatoes.","Fry onions in butter till golden. Add ginger-garlic.","Add tomato paste. Cook 10 min till oil separates.","Add spices, paneer, cream. Simmer 3 min.","Garnish kasuri methi."]},
+  {id:2, name:"Dal Tadka",            e:"🥘",t:"25 min",tm:25,c:"310 kcal",diet:"veg",   d:"Easy",  stars:4.7,
+   desc:"Protein-rich yellow lentil dish with aromatic ghee tempering. A true Indian classic.",
+   ingredients:["1 cup yellow dal","1 tomato","1 onion","4 garlic cloves","Cumin seeds","Dry red chillies","Ghee 2 tbsp","Turmeric","Fresh coriander","Salt"],
+   steps:["Pressure cook dal with turmeric 3-4 whistles.","Mash lightly. Adjust water.","Heat ghee very hot. Splutter cumin. Fry garlic golden.","Add onion, tomato, chillies. Cook till soft.","Pour hot tadka over dal. Garnish coriander."]},
+  {id:3, name:"Chicken Biryani",      e:"🍚",t:"55 min",tm:55,c:"650 kcal",diet:"nonveg",d:"Hard",  stars:4.9,
+   desc:"Fragrant basmati rice layered with spiced marinated chicken.",
+   ingredients:["500g chicken","2 cups basmati rice","100g yogurt","2 onions","Biryani masala","Saffron pinch","Mint handful","Oil 4 tbsp","Lemon juice","Salt"],
+   steps:["Marinate chicken in yogurt & masala 1 hour.","Soak saffron in warm milk.","Fry onions crispy golden.","Parboil rice 70%. Drain.","Layer and dum cook sealed 25 min."]},
+  {id:4, name:"Egg Bhurji",           e:"🍳",t:"15 min",tm:15,c:"280 kcal",diet:"egg",   d:"Easy",  stars:4.5,
+   desc:"Mumbai-style spiced scrambled eggs with onions and tomatoes.",
+   ingredients:["3 eggs","1 onion","1 tomato","2 green chillies","Cumin seeds","Turmeric","Oil 1 tbsp","Fresh coriander","Salt & pepper"],
+   steps:["Beat eggs with salt.","Sauté onion and chillies in oil.","Add tomato and turmeric.","Pour eggs. Scramble on medium.","Garnish coriander."]},
+  {id:5, name:"Aloo Gobi",            e:"🥦",t:"30 min",tm:30,c:"220 kcal",diet:"jain",  d:"Easy",  stars:4.4,
+   desc:"Jain-style potato and cauliflower sabzi without onion or garlic.",
+   ingredients:["2 potatoes","1 cauliflower","Cumin seeds","Turmeric 1 tsp","Coriander powder","Red chilli powder","Oil 2 tbsp","Fresh coriander","Salt"],
+   steps:["Cut potato and cauliflower.","Heat oil, add cumin seeds.","Add potato, cook 5 min.","Add cauliflower, all spices, salt.","Cover and cook 15 min. Garnish."]},
+  {id:6, name:"Butter Chicken",       e:"🍗",t:"45 min",tm:45,c:"560 kcal",diet:"nonveg",d:"Medium",stars:4.9,
+   desc:"Silky makhani gravy with tender grilled chicken. India's most loved dish.",
+   ingredients:["500g chicken","3 tomatoes","1 onion","Butter 3 tbsp","Fresh cream 100ml","Ginger-garlic paste","Kashmiri chilli 1.5 tsp","Garam masala","Yogurt for marinade","Kasuri methi","Salt"],
+   steps:["Marinate chicken with yogurt & spices 1 hour.","Grill till charred. Set aside.","Cook onion in butter. Add tomatoes. Blend smooth.","Add spices, chicken. Simmer 10 min.","Add cream on low heat. Finish kasuri methi."]},
+  {id:7, name:"Palak Paneer",         e:"🌿",t:"35 min",tm:35,c:"380 kcal",diet:"veg",   d:"Medium",stars:4.6,
+   desc:"Paneer cubes in vibrant green spinach gravy. Nutritious and restaurant-quality.",
+   ingredients:["200g paneer","250g fresh spinach","1 onion","1 tomato","Garlic 4 cloves","Ginger 1 inch","Green chillies","Fresh cream 2 tbsp","Oil/butter","Garam masala","Salt"],
+   steps:["Blanch spinach 2 min. Ice bath immediately.","Blend with green chillies smooth.","Sauté onion, garlic, ginger. Add tomato.","Add spinach puree. Simmer 5 min.","Add paneer. Add cream on low heat 2 min."]},
+  {id:8, name:"Masala Omelette",      e:"🥚",t:"10 min",tm:10,c:"240 kcal",diet:"egg",   d:"Easy",  stars:4.3,
+   desc:"Mumbai street-style spicy omelette. Crispy edges, soft inside.",
+   ingredients:["2 eggs","1 small onion","1 green chilli","Coriander","Oil 1 tsp","Salt & pepper"],
+   steps:["Beat eggs with salt.","Add onion, chilli, coriander.","Heat oil in pan.","Pour mix, cook 2 min.","Fold. Serve with toast."]},
+  {id:9, name:"Mutton Curry",         e:"🍖",t:"60 min",tm:60,c:"580 kcal",diet:"nonveg",d:"Hard",  stars:4.8,
+   desc:"Rich and tender mutton in a thick spiced masala gravy.",
+   ingredients:["500g mutton","2 onions","3 tomatoes","100g yogurt","Ginger-garlic paste","Mutton masala","Whole spices","Oil 4 tbsp","Coriander","Salt"],
+   steps:["Marinate mutton with yogurt & spices 1 hour.","Fry whole spices. Cook onions deep golden.","Add ginger-garlic, tomatoes. Cook till oil separates.","Add mutton. Brown on high heat.","Pressure cook 6-7 whistles. Adjust gravy."]},
+  {id:10,name:"Veg Biryani",          e:"🍛",t:"40 min",tm:40,c:"420 kcal",diet:"veg",   d:"Medium",stars:4.5,
+   desc:"Aromatic basmati rice layered with spiced vegetables.",
+   ingredients:["2 cups basmati rice","Mixed veg 300g","1 onion","Biryani masala","Saffron milk","Mint","Ghee 2 tbsp","Fried onions","Salt"],
+   steps:["Parboil rice 70%. Drain.","Cook vegetables with spices.","Layer rice and veg alternately.","Add saffron milk, mint, fried onions.","Seal and dum cook 20 min."]},
+  {id:11,name:"Chole",                e:"🫘",t:"35 min",tm:35,c:"340 kcal",diet:"veg",   d:"Medium",stars:4.6,
+   desc:"Punjabi-style spiced chickpeas. Perfect with bhature or rice.",
+   ingredients:["1 can chickpeas","2 onions","2 tomatoes","Ginger-garlic paste","Chole masala 2 tbsp","Oil 3 tbsp","Amchur","Coriander","Salt"],
+   steps:["Fry onions golden. Add ginger-garlic.","Add tomatoes. Cook till oil separates.","Add chole masala, amchur.","Add chickpeas. Mash a few for thick gravy.","Simmer 15 min. Garnish coriander."]},
+  {id:12,name:"Khichdi",              e:"🍲",t:"20 min",tm:20,c:"280 kcal",diet:"jain",  d:"Easy",  stars:4.4,
+   desc:"Comforting one-pot rice and lentil dish. Jain-friendly, digestive, perfect for all ages.",
+   ingredients:["1 cup rice","1/2 cup moong dal","Cumin 1 tsp","Turmeric 1 tsp","Ghee 2 tbsp","Salt","Asafoetida pinch"],
+   steps:["Wash rice and dal together.","Heat ghee. Add cumin and asafoetida.","Add rice, dal, turmeric, salt, 3 cups water.","Pressure cook 3 whistles.","Add extra ghee before serving."]},
+  {id:13,name:"Rajma",                e:"🫘",t:"40 min",tm:40,c:"360 kcal",diet:"veg",   d:"Easy",  stars:4.6,
+   desc:"Creamy red kidney bean curry in rich North Indian gravy.",
+   ingredients:["1 can kidney beans","2 onions","3 tomatoes","Ginger-garlic paste","Rajma masala","Oil 3 tbsp","Cream (optional)","Salt","Coriander"],
+   steps:["Fry onions golden. Add ginger-garlic.","Add tomatoes. Cook till oil separates.","Add rajma masala.","Add kidney beans. Simmer 15-20 min.","Serve hot with rice."]},
+  {id:14,name:"Paneer Tikka",         e:"🍢",t:"25 min",tm:25,c:"350 kcal",diet:"veg",   d:"Easy",  stars:4.7,
+   desc:"Chargrilled marinated paneer with peppers and onions.",
+   ingredients:["300g paneer","1 capsicum","1 onion","Yogurt 4 tbsp","Tikka masala 2 tbsp","Ginger-garlic paste","Oil","Lemon juice","Salt"],
+   steps:["Cube paneer, capsicum, onion.","Mix yogurt, tikka masala, lemon.","Marinate paneer & veg 30 min.","Grill/air-fry 15 min at 200°C.","Serve with mint chutney."]},
+  /* ── SENIOR-FRIENDLY (soft, easy to chew) ── */
+  {id:15,name:"Chicken Haleem",        e:"🍲",t:"90 min",tm:90,c:"480 kcal",diet:"nonveg",d:"Medium",stars:4.9,
+   ageTag:"senior",
+   desc:"Slow-cooked chicken and wheat porridge — ultra-tender, high-protein, easy to chew. Perfect for seniors.",
+   ingredients:["400g boneless chicken","1 cup broken wheat (dalia)","2 onions","Ginger-garlic paste","Haleem masala","Ghee 3 tbsp","Fresh mint","Lemon juice","Fried onions","Salt"],
+   steps:["Soak broken wheat 1 hour.","Cook chicken with spices till very tender.","Shred chicken with forks. Add soaked wheat.","Cook on low heat 45 min, stirring, till porridge consistency.","Garnish with fried onions, mint, lemon. Serve hot."]},
+  {id:16,name:"Soft Dal Khichdi",      e:"🥣",t:"25 min",tm:25,c:"290 kcal",diet:"veg",   d:"Easy",  stars:4.8,
+   ageTag:"senior",
+   desc:"Ultra-soft dal and rice cooked together — digestive, low-sodium, easy on joints. Ideal for seniors.",
+   ingredients:["3/4 cup rice","1/2 cup moong dal","Turmeric pinch","Ghee 2 tbsp","Cumin seeds","Asafoetida pinch","Ginger 1 tsp (grated)","Salt minimal"],
+   steps:["Rinse rice and moong dal.","Heat ghee in pressure cooker. Add cumin, asafoetida, ginger.","Add rice, dal, turmeric, 4 cups water.","Pressure cook 4 whistles — very soft consistency.","Add extra ghee. Serve with low-spice pickle."]},
+  {id:17,name:"Murgh Shorba",          e:"🍵",t:"40 min",tm:40,c:"180 kcal",diet:"nonveg",d:"Easy",  stars:4.7,
+   ageTag:"senior",
+   desc:"Light chicken broth soup — easy to digest, comforting, great for seniors and unwell days.",
+   ingredients:["300g chicken (bone-in)","1 onion","2 garlic cloves","Ginger 1 inch","Whole black pepper 6","Bay leaf 1","Turmeric pinch","Fresh coriander","Salt minimal","Lemon"],
+   steps:["Add all ingredients except coriander and lemon to a pot with 4 cups water.","Bring to boil. Simmer covered 35 min.","Strain the broth. Shred soft chicken and return to broth.","Adjust salt (minimal). Add fresh coriander.","Squeeze lemon. Serve hot in a cup."]},
+  /* ── CHILDREN-FRIENDLY (healthy, mild, fun) ── */
+  {id:18,name:"Banana Oat Pancakes",   e:"🥞",t:"15 min",tm:15,c:"220 kcal",diet:"veg",   d:"Easy",  stars:4.6,
+   ageTag:"child",
+   desc:"No-sugar healthy pancakes for kids — just banana, oats and egg. Delicious and nutritious!",
+   ingredients:["1 ripe banana","2 eggs","1/2 cup rolled oats","Cinnamon pinch","Honey (optional)","Butter for pan"],
+   steps:["Mash banana well in a bowl.","Add eggs and oats. Mix till combined.","Heat buttered pan on medium-low.","Pour small rounds. Cook 2 min each side.","Drizzle honey. Serve with fruit."]},
+  {id:19,name:"Paneer Paratha",        e:"🫓",t:"20 min",tm:20,c:"320 kcal",diet:"veg",   d:"Easy",  stars:4.7,
+   ageTag:"child",
+   desc:"Crispy stuffed flatbread with paneer filling — kids love it! High in protein and calcium.",
+   ingredients:["2 cups wheat flour","200g paneer","1 tsp cumin","Coriander leaves","1 green chilli (optional)","Salt","Ghee/butter"],
+   steps:["Knead soft dough with flour, salt, water. Rest 15 min.","Crumble paneer, mix with cumin, coriander, minimal chilli.","Roll dough ball flat. Add paneer filling in centre.","Fold and re-roll gently into paratha.","Cook on hot tawa with ghee both sides till golden."]},
+  {id:20,name:"Vegetable Khichdi",     e:"🍲",t:"25 min",tm:25,c:"270 kcal",diet:"veg",   d:"Easy",  stars:4.5,
+   ageTag:"child",
+   desc:"Colourful one-pot vegetable khichdi for kids — packed with vitamins and very mildly spiced.",
+   ingredients:["1/2 cup rice","1/4 cup moong dal","1 carrot","1/2 cup peas","1 potato","Ghee 2 tbsp","Cumin seeds","Turmeric pinch","Salt minimal"],
+   steps:["Dice vegetables finely.","Heat ghee. Add cumin. Add vegetables, sauté 2 min.","Add washed rice and dal. Add turmeric and salt.","Add 3 cups water. Pressure cook 3 whistles.","Mash lightly. Add ghee. Serve warm."]},
+  /* ── TEEN-FRIENDLY (high protein, filling) ── */
+  {id:21,name:"Egg Fried Rice",        e:"🍳",t:"20 min",tm:20,c:"380 kcal",diet:"egg",   d:"Easy",  stars:4.5,
+   ageTag:"teen",
+   desc:"Indo-Chinese egg fried rice — quick, protein-rich, loved by teens. Perfect post-school meal.",
+   ingredients:["2 cups cooked rice","3 eggs","1 onion","1 capsicum","2 tbsp soy sauce","Garlic 3 cloves","Oil 2 tbsp","Spring onions","Salt & pepper"],
+   steps:["Heat oil on high. Add garlic, onion, capsicum. Stir fry 2 min.","Push to side. Scramble eggs in pan.","Add rice. Toss well on high heat.","Add soy sauce, salt, pepper. Mix.","Garnish spring onions. Serve hot."]},
+  {id:22,name:"Chicken Wrap",          e:"🌯",t:"25 min",tm:25,c:"450 kcal",diet:"nonveg",d:"Easy",  stars:4.6,
+   ageTag:"teen",
+   desc:"High-protein grilled chicken wrap with veggies — teens love this healthy fast-food alternative.",
+   ingredients:["2 chicken breasts","4 large rotis/tortillas","1 onion (sliced)","1 capsicum","Yogurt 4 tbsp","Tikka masala 1 tbsp","Lettuce","Lemon juice","Salt"],
+   steps:["Marinate chicken with yogurt, tikka masala, lemon, salt 30 min.","Grill or pan-fry chicken till cooked. Slice into strips.","Warm rotis on tawa.","Layer: lettuce, chicken, onion, capsicum on roti.","Roll tightly. Serve with mint chutney."]},
+  /* ── ADULT WELLNESS ── */
+  {id:23,name:"Masoor Dal Soup",       e:"🍜",t:"30 min",tm:30,c:"240 kcal",diet:"veg",   d:"Easy",  stars:4.5,
+   desc:"Thick red lentil soup — high fibre, iron-rich, great for weight management and heart health.",
+   ingredients:["1 cup masoor dal (red lentil)","2 tomatoes","1 onion","Garlic 4 cloves","Spinach handful","Lemon juice","Olive oil / ghee 1 tbsp","Cumin seeds","Turmeric","Salt & pepper"],
+   steps:["Rinse masoor dal well.","Heat oil. Add cumin, garlic, onion. Sauté 3 min.","Add tomatoes and turmeric. Cook 5 min.","Add dal and 3 cups water. Simmer 20 min till soft.","Add spinach, lemon juice. Blend half for thick texture."]},
+  {id:24,name:"Grilled Fish Tikka",    e:"🐟",t:"25 min",tm:25,c:"280 kcal",diet:"nonveg",d:"Easy",  stars:4.6,
+   desc:"Light grilled fish with Indian spices — low fat, high protein, excellent for adults and weight loss.",
+   ingredients:["400g fish fillets (surmai/pomfret)","Yogurt 3 tbsp","Tikka masala 1.5 tbsp","Ginger-garlic paste","Lemon juice","Turmeric","Oil 1 tbsp","Fresh coriander","Salt"],
+   steps:["Pat fish dry. Cut into large pieces.","Mix yogurt, tikka masala, ginger-garlic, lemon, turmeric, salt.","Coat fish well. Marinate 30 min.","Grill or bake 200°C for 15 min. Flip once.","Garnish coriander and lemon. Serve."]},
+  {id:25,name:"Saag Aloo",             e:"🥬",t:"30 min",tm:30,c:"230 kcal",diet:"veg",   d:"Easy",  stars:4.4,
+   desc:"Spiced spinach and potato sabzi — iron and calcium-rich, great with roti for any age group.",
+   ingredients:["300g fresh spinach","2 potatoes","1 onion","Garlic 3 cloves","Ginger 1 tsp","Tomato 1","Cumin seeds","Turmeric","Red chilli","Oil 2 tbsp","Salt"],
+   steps:["Blanch spinach 2 min. Drain and roughly chop.","Boil potatoes till just tender. Cube.","Heat oil. Add cumin, garlic, ginger, onion. Cook till golden.","Add tomato and spices. Cook 5 min.","Add potatoes and spinach. Mix and cook 5 min."]},
+  {id:26,name:"Chicken Stew",          e:"🍗",t:"45 min",tm:45,c:"320 kcal",diet:"nonveg",d:"Medium",stars:4.5,
+   ageTag:"senior",
+   desc:"Kerala-style mild chicken stew with vegetables and coconut milk — very soft, digestive, senior-friendly.",
+   ingredients:["400g chicken (bone-in)","2 potatoes","1 carrot","Coconut milk 200ml","1 onion","Ginger 1 inch","Green chillies 2 (mild)","Whole peppercorns 6","Bay leaf","Coconut oil 2 tbsp","Salt"],
+   steps:["Heat coconut oil. Add peppercorns, bay leaf, ginger, onion.","Cook till soft — NOT golden. Keep it mild.","Add chicken, vegetables. Add 1 cup water.","Pressure cook 3 whistles — very tender.","Add coconut milk. Simmer 5 min on low. Serve hot with appam or roti."]},
+  {id:27,name:"Moong Dal Halwa",       e:"🍮",t:"40 min",tm:40,c:"380 kcal",diet:"veg",   d:"Medium",stars:4.7,
+   desc:"Traditional moong dal dessert — rich in protein, slow energy release, beloved across all ages in North India.",
+   ingredients:["1 cup moong dal (split yellow)","1/2 cup sugar","Ghee 4 tbsp","Milk 1 cup","Cardamom powder","Saffron pinch","Almonds & cashews","Raisins"],
+   steps:["Dry roast moong dal. Then soak 2 hours.","Grind to coarse paste. No water.","Heat ghee. Fry dal paste on low heat 20 min, stirring constantly.","Add sugar, milk, cardamom, saffron. Cook stirring till thick.","Garnish with fried nuts and raisins."]},
+];
+
+/* ═══════════════════════════════════════════
+   AGE GROUP DEFINITIONS — NUTRITION TIPS
+*/
+// AGE_GROUPS — returns appropriate group based on userDiet for best suggestions
+function getAgeFoods(ageKey, diet){
+  const allFoods = {
+    child:{
+      veg:[{n:'🍲 Khichdi',cal:260,p:10,c:44,f:6},{n:'🥛 Warm Milk',cal:150,p:8,c:12,f:8},{n:'🧀 Paneer Sabzi',cal:280,p:12,c:20,f:16},{n:'🍌 Banana',cal:90,p:1,c:23,f:0},{n:'🥣 Curd Rice',cal:220,p:8,c:38,f:3},{n:'🫓 Paneer Paratha',cal:320,p:14,c:38,f:12}],
+      egg:[{n:'🥞 Banana Oat Pancakes',cal:220,p:10,c:34,f:6},{n:'🍳 Soft Egg Bhurji',cal:200,p:14,c:6,f:14},{n:'🍲 Khichdi',cal:260,p:10,c:44,f:6},{n:'🥛 Warm Milk',cal:150,p:8,c:12,f:8},{n:'🫓 Egg Paratha',cal:280,p:16,c:30,f:10},{n:'🧀 Paneer 50g',cal:140,p:9,c:2,f:11}],
+      nonveg:[{n:'🍗 Soft Chicken Soup',cal:180,p:22,c:4,f:8},{n:'🍲 Chicken Khichdi',cal:320,p:20,c:40,f:8},{n:'🥛 Warm Milk',cal:150,p:8,c:12,f:8},{n:'🍌 Banana',cal:90,p:1,c:23,f:0},{n:'🥣 Curd Rice',cal:220,p:8,c:38,f:3},{n:'🫓 Paneer Paratha',cal:320,p:14,c:38,f:12}],
+      jain:[{n:'🍲 Khichdi',cal:260,p:10,c:44,f:6},{n:'🥛 Warm Milk',cal:150,p:8,c:12,f:8},{n:'🧀 Paneer Sabzi',cal:280,p:12,c:20,f:16},{n:'🍌 Banana',cal:90,p:1,c:23,f:0},{n:'🫓 Plain Paratha + Ghee',cal:240,p:6,c:36,f:8},{n:'🥣 Curd 200g',cal:120,p:8,c:10,f:5}]
+    },
+    teen:{
+      veg:[{n:'🥘 Dal Tadka',cal:310,p:14,c:44,f:8},{n:'🧀 Paneer Tikka',cal:350,p:22,c:12,f:24},{n:'🫓 Roti 2 pcs',cal:240,p:8,c:44,f:4},{n:'🥣 Curd 200g',cal:120,p:8,c:10,f:5},{n:'🍚 Dal Chawal',cal:400,p:16,c:68,f:8},{n:'🫘 Chole',cal:340,p:16,c:50,f:8}],
+      egg:[{n:'🍳 Egg Bhurji',cal:280,p:18,c:10,f:18},{n:'🌯 Egg Roll',cal:380,p:20,c:44,f:14},{n:'🥘 Dal Tadka',cal:310,p:14,c:44,f:8},{n:'🫓 Roti 2 pcs',cal:240,p:8,c:44,f:4},{n:'🥣 Curd 200g',cal:120,p:8,c:10,f:5},{n:'🍳 Boiled Eggs 2',cal:140,p:12,c:2,f:10}],
+      nonveg:[{n:'🍗 Grilled Chicken',cal:220,p:35,c:0,f:8},{n:'🌯 Chicken Wrap',cal:450,p:32,c:44,f:14},{n:'🥘 Egg Bhurji',cal:280,p:18,c:10,f:18},{n:'🍗 Butter Chicken',cal:380,p:28,c:14,f:22},{n:'🫓 Roti 2 pcs',cal:240,p:8,c:44,f:4},{n:'🥣 Curd 200g',cal:120,p:8,c:10,f:5}],
+      jain:[{n:'🥘 Dal Tadka',cal:310,p:14,c:44,f:8},{n:'🧀 Paneer Tikka',cal:350,p:22,c:12,f:24},{n:'🫓 Roti 2 pcs',cal:240,p:8,c:44,f:4},{n:'🥣 Curd 200g',cal:120,p:8,c:10,f:5},{n:'🫘 Chole',cal:340,p:16,c:50,f:8},{n:'🍲 Khichdi',cal:260,p:10,c:44,f:6}]
+    },
+    adult:{
+      veg:[{n:'🍛 Paneer Butter Masala',cal:420,p:18,c:22,f:28},{n:'🍚 Steamed Rice',cal:200,p:4,c:44,f:1},{n:'🥗 Mixed Salad',cal:80,p:3,c:12,f:4},{n:'🫘 Rajma',cal:360,p:18,c:58,f:14},{n:'☕ Chai with milk',cal:60,p:2,c:10,f:3},{n:'🌿 Palak Paneer',cal:380,p:20,c:14,f:26}],
+      egg:[{n:'🍳 Masala Omelette',cal:240,p:14,c:8,f:16},{n:'🍛 Paneer Butter Masala',cal:420,p:18,c:22,f:28},{n:'🍚 Egg Fried Rice',cal:380,p:16,c:52,f:12},{n:'🫘 Rajma',cal:360,p:18,c:58,f:14},{n:'🥗 Mixed Salad',cal:80,p:3,c:12,f:4},{n:'☕ Chai with milk',cal:60,p:2,c:10,f:3}],
+      nonveg:[{n:'🍗 Butter Chicken',cal:380,p:28,c:14,f:22},{n:'🍚 Chicken Biryani',cal:450,p:24,c:55,f:16},{n:'🐟 Grilled Fish Tikka',cal:280,p:32,c:6,f:12},{n:'🍖 Mutton Curry',cal:380,p:30,c:12,f:24},{n:'🥗 Mixed Salad',cal:80,p:3,c:12,f:4},{n:'☕ Chai with milk',cal:60,p:2,c:10,f:3}],
+      jain:[{n:'🫘 Chole',cal:340,p:16,c:50,f:8},{n:'🍚 Veg Biryani',cal:420,p:10,c:72,f:12},{n:'🌿 Palak Paneer',cal:380,p:20,c:14,f:26},{n:'🥗 Mixed Salad',cal:80,p:3,c:12,f:4},{n:'🫓 Roti',cal:120,p:4,c:22,f:2},{n:'☕ Chai with milk',cal:60,p:2,c:10,f:3}]
+    },
+    senior:{
+      veg:[{n:'🥣 Soft Dal Khichdi',cal:290,p:12,c:46,f:8},{n:'🥛 Warm Milk + Turmeric',cal:160,p:8,c:14,f:8},{n:'🧀 Paneer (steamed/soft)',cal:265,p:18,c:4,f:20},{n:'🍌 Ripe Banana',cal:90,p:1,c:23,f:0},{n:'🥬 Saag Aloo (soft)',cal:230,p:6,c:32,f:8},{n:'🫓 Soft Roti with Ghee',cal:140,p:4,c:22,f:5}],
+      egg:[{n:'🥣 Soft Dal Khichdi',cal:290,p:12,c:46,f:8},{n:'🍳 Soft Boiled Eggs 2',cal:140,p:12,c:2,f:10},{n:'🥛 Warm Milk + Turmeric',cal:160,p:8,c:14,f:8},{n:'🍌 Ripe Banana',cal:90,p:1,c:23,f:0},{n:'🍵 Egg Soup (light)',cal:120,p:10,c:6,f:6},{n:'🥬 Saag (pureed)',cal:150,p:5,c:18,f:8}],
+      nonveg:[{n:'🍲 Chicken Haleem',cal:480,p:38,c:32,f:18},{n:'🍵 Murgh Shorba (broth)',cal:180,p:20,c:6,f:8},{n:'🍗 Soft Chicken Stew',cal:320,p:28,c:18,f:14},{n:'🥣 Soft Dal Khichdi',cal:290,p:12,c:46,f:8},{n:'🥛 Warm Milk + Turmeric',cal:160,p:8,c:14,f:8},{n:'🍌 Ripe Banana',cal:90,p:1,c:23,f:0}],
+      jain:[{n:'🥣 Soft Dal Khichdi',cal:290,p:12,c:46,f:8},{n:'🥛 Warm Milk + Turmeric',cal:160,p:8,c:14,f:8},{n:'🧀 Paneer (soft/steamed)',cal:265,p:18,c:4,f:20},{n:'🍌 Ripe Banana',cal:90,p:1,c:23,f:0},{n:'🍮 Moong Dal Halwa (small)',cal:200,p:6,c:28,f:8},{n:'🫓 Soft Roti + Ghee',cal:140,p:4,c:22,f:5}]
+    }
+  };
+  const d = (diet==='nonveg')?'nonveg':(diet==='egg')?'egg':(diet==='jain')?'jain':'veg';
+  return allFoods[ageKey]?.[d] || allFoods[ageKey]?.veg || [];
+}
+
+const AGE_GROUPS = {
+  child: {
+    min:1, max:12,
+    ico:'🧒', title:'Nutrition Tips for Kids (Under 12)',
+    sub:'Children need calcium for strong bones, healthy fats for brain development, and iron from dal and greens. Keep spice mild! Simple dishes like khichdi, dal chawal, paneer paratha, and banana oat pancakes are best. Avoid very spicy or fried foods.',
+    tipClass:'child-tip',
+    calGoal:1600, pGoal:40, cGoal:220, fGoal:45,
+    goals:[{l:'🔥 1600 kcal/day'},{l:'💪 Protein: 40g'},{l:'🌾 Carbs: 220g'},{l:'🥑 Fat: 45g'}],
+    foods:[]
+  },
+  teen: {
+    min:13, max:19,
+    ico:'🧑', title:'Nutrition Tips for Teens (13–19)',
+    sub:'High growth phase — needs more iron (dal, greens, especially for girls), calcium (paneer, milk, curd), and protein (chicken, eggs, dal) for muscle development. Include dal at least once daily. Protein-rich breakfasts fuel focus at school!',
+    tipClass:'teen-tip',
+    calGoal:2200, pGoal:65, cGoal:300, fGoal:70,
+    goals:[{l:'🔥 2200 kcal/day'},{l:'💪 Protein: 65g'},{l:'🌾 Carbs: 300g'},{l:'🥑 Fat: 70g'}],
+    foods:[]
+  },
+  adult: {
+    min:20, max:59,
+    ico:'🧑‍💼', title:'Nutrition Tips for Adults (20–59)',
+    sub:'Balanced diet is key. Include protein in every meal. Watch saturated fats and refined carbs. Aim for 5 servings of vegetables daily. Fibre supports gut health. 2000–2200 kcal is a good daily target for moderate activity.',
+    tipClass:'adult-tip',
+    calGoal:2000, pGoal:60, cGoal:250, fGoal:65,
+    goals:[{l:'🔥 2000 kcal/day'},{l:'💪 Protein: 60g'},{l:'🌾 Carbs: 250g'},{l:'🥑 Fat: 65g'}],
+    foods:[]
+  },
+  senior: {
+    min:60, max:150,
+    ico:'🧓', title:'Nutrition Tips for Seniors (60+)',
+    sub:'Choose soft, easy-to-chew foods: Chicken Haleem, soft khichdi, chicken shorba. Reduce sodium and fried foods. Increase calcium (curd, paneer), Vitamin D (eggs, sunlight), and fibre. Eat smaller meals more often. Stay hydrated!',
+    tipClass:'senior-tip',
+    calGoal:1700, pGoal:55, cGoal:210, fGoal:55,
+    goals:[{l:'🔥 1700 kcal/day'},{l:'💪 Protein: 55g'},{l:'🌾 Carbs: 210g'},{l:'🥑 Fat: 55g'}],
+    foods:[]
+  }
+};
+
+function getAgeGroup(age){
+  age = parseInt(age) || 0;
+  return Object.values(AGE_GROUPS).find(g => age >= g.min && age <= g.max) || null;
+}
+
+/* PANTRY PACKAGES — masalas, oil, salt all need FULL PACK */
+const PANTRY_PKG = {
+  'Red Chilli Powder':     {pkg:'100g pack',  price:35},
+  'Kashmiri Chilli Powder':{pkg:'100g pack',  price:38},
+  'Turmeric Powder':       {pkg:'100g pack',  price:28},
+  'Coriander Powder':      {pkg:'100g pack',  price:30},
+  'Garam Masala':          {pkg:'50g pack',   price:40},
+  'Cumin Seeds':           {pkg:'100g pack',  price:32},
+  'Mustard Seeds':         {pkg:'100g pack',  price:22},
+  'Biryani Masala':        {pkg:'50g pack',   price:45},
+  'Tikka Masala':          {pkg:'50g pack',   price:42},
+  'Chole Masala':          {pkg:'50g pack',   price:38},
+  'Rajma Masala':          {pkg:'50g pack',   price:36},
+  'Mutton Masala':         {pkg:'50g pack',   price:48},
+  'Fish Curry Masala':     {pkg:'50g pack',   price:40},
+  'Oil / Ghee':            {pkg:'500ml bottle',price:85},
+  'Ghee':                  {pkg:'200g tin',   price:110},
+  'Oil':                   {pkg:'500ml bottle',price:85},
+  'Butter':                {pkg:'100g pack',  price:55},
+  'Ginger-Garlic Paste':   {pkg:'200g jar',   price:40},
+  'Kasuri Methi':          {pkg:'25g pack',   price:22},
+  'Salt':                  {pkg:'1kg pack',   price:18},
+  'Asafoetida':            {pkg:'25g pack',   price:30},
+  'Green Chillies':        {pkg:'100g pack',  price:15},
+  'Dry Red Chillies':      {pkg:'50g pack',   price:24},
+  '_def':                  {pkg:'standard pack',price:32}
+};
+function getPkg(name){
+  const k = Object.keys(PANTRY_PKG).find(k => k!=='_def' && name.toLowerCase().includes(k.toLowerCase()));
+  return k ? PANTRY_PKG[k] : PANTRY_PKG['_def'];
+}
+
+/* RECIPE TEMPLATES */
+const RTPL = {
+  'Paneer Butter Masala':{
+    fresh:[{e:'🧀',n:'Paneer',qty:'per',unit:'g',base:200,price:3.5},{e:'🍅',n:'Ripe Tomatoes',qty:'per',unit:'pcs',base:3,price:6},{e:'🧅',n:'Onion',qty:'per',unit:'pcs',base:1,price:8},{e:'🥛',n:'Fresh Cream',qty:'flat',unit:'ml',base:100,price:0.5},{e:'🌰',n:'Cashews',qty:'flat',unit:'g',base:20,price:1.5}],
+    pantry:[{e:'🧈',n:'Butter',unit:'tbsp',base:3},{e:'🫙',n:'Ginger-Garlic Paste',unit:'tbsp',base:2},{e:'🌶️',n:'Kashmiri Chilli Powder',unit:'tsp',base:1,spice:true},{e:'🫙',n:'Garam Masala',unit:'tsp',base:1},{e:'🌿',n:'Kasuri Methi',unit:'tsp',base:1},{e:'🧂',n:'Salt',unit:'to taste',base:0}],
+    steps:['Soak cashews 10 min, blend with tomatoes to smooth paste.','Heat butter. Fry onions golden (8 min). Add ginger-garlic paste 2 min.','Add tomato-cashew paste. Cook 10 min till oil separates.','Add Kashmiri chilli, garam masala, salt. Cook 2 min.','Add paneer cubes. Pour fresh cream. Simmer low 3 min — do NOT boil.','Crush kasuri methi between palms. Sprinkle on top. Serve hot with naan.'],
+    tips:'Pan-fry paneer in 1 tbsp butter till golden before adding to gravy — prevents crumbling and adds incredible flavour!',
+    time:'30 min',cal:'420 kcal',nut:{Protein:'18g',Carbs:'22g',Fat:'28g',Fibre:'4g'}
+  },
+  'Dal Tadka':{
+    fresh:[{e:'🫘',n:'Yellow Dal (Toor/Moong)',qty:'per',unit:'g',base:100,price:1.8},{e:'🍅',n:'Tomato',qty:'per',unit:'pcs',base:1,price:6},{e:'🧅',n:'Onion',qty:'per',unit:'pcs',base:1,price:8},{e:'🧄',n:'Garlic Cloves',qty:'per',unit:'cloves',base:4,price:2},{e:'🌿',n:'Fresh Coriander',qty:'flat',unit:'bunch',base:1,price:8}],
+    pantry:[{e:'🫚',n:'Ghee',unit:'tbsp',base:2},{e:'🌿',n:'Cumin Seeds',unit:'tsp',base:1},{e:'🌶️',n:'Dry Red Chillies',unit:'pcs',base:2,spice:true},{e:'💛',n:'Turmeric Powder',unit:'tsp',base:0.5},{e:'🧂',n:'Salt',unit:'to taste',base:0}],
+    steps:['Wash dal. Pressure cook with turmeric, salt, 2.5 cups water — 3-4 whistles.','Mash lightly. Adjust water for consistency.','Heat ghee very hot in a small tadka pan.','Add cumin seeds — let them splutter 10 sec. Add sliced garlic till golden.','Add dry red chillies, chopped onion and tomato. Cook till soft.','Pour hot sizzling tadka over dal. Mix gently. Garnish fresh coriander.'],
+    tips:'Tadka MUST be very hot when poured — the sizzle is what gives the authentic dhaba aroma! Use pure ghee, not oil.',
+    time:'25 min',cal:'310 kcal',nut:{Protein:'14g',Carbs:'44g',Fat:'8g',Fibre:'12g'}
+  },
+  'Chicken Biryani':{
+    fresh:[{e:'🍗',n:'Chicken (curry cut)',qty:'per',unit:'g',base:250,price:2.8},{e:'🍚',n:'Basmati Rice',qty:'per',unit:'g',base:125,price:1},{e:'🧅',n:'Onions (frying)',qty:'per',unit:'pcs',base:2,price:6},{e:'🍶',n:'Yogurt',qty:'flat',unit:'g',base:100,price:0.5},{e:'🌿',n:'Fresh Mint',qty:'flat',unit:'handful',base:1,price:10},{e:'🌸',n:'Saffron',qty:'flat',unit:'pinch',base:1,price:5},{e:'🍋',n:'Lemon Juice',qty:'flat',unit:'tbsp',base:1,price:4}],
+    pantry:[{e:'🫙',n:'Biryani Masala',unit:'tbsp',base:2,spice:true},{e:'🫚',n:'Oil / Ghee',unit:'tbsp',base:4},{e:'🧂',n:'Salt',unit:'to taste',base:0}],
+    steps:['Marinate chicken with yogurt, biryani masala, lemon, salt — minimum 1 hour.','Soak saffron in 3 tbsp warm milk 20 min.','Fry sliced onions in hot oil till crispy golden. Drain.','Parboil basmati rice 70% done with whole spices. Drain.','Layer: chicken → half rice → fried onions → mint → rest of rice → saffron milk → ghee drizzle.','Seal tightly with foil + lid. Dum cook on very low flame 25 min. Rest 10 min before opening.'],
+    tips:'Sealing the pot tightly is the secret. Use a heavy iron pot and always rest 10 min before opening the dum.',
+    time:'55 min',cal:'650 kcal',nut:{Protein:'32g',Carbs:'72g',Fat:'22g',Fibre:'3g'}
+  },
+  'Butter Chicken':{
+    fresh:[{e:'🍗',n:'Boneless Chicken',qty:'per',unit:'g',base:250,price:2.8},{e:'🍅',n:'Tomatoes',qty:'per',unit:'pcs',base:3,price:6},{e:'🧅',n:'Onion',qty:'per',unit:'pcs',base:1,price:8},{e:'🥛',n:'Fresh Cream',qty:'flat',unit:'ml',base:100,price:0.5},{e:'🍶',n:'Yogurt (marinade)',qty:'flat',unit:'tbsp',base:3,price:0.3}],
+    pantry:[{e:'🧈',n:'Butter',unit:'tbsp',base:3},{e:'🫙',n:'Ginger-Garlic Paste',unit:'tbsp',base:1},{e:'🌶️',n:'Kashmiri Chilli Powder',unit:'tsp',base:1.5,spice:true},{e:'🫙',n:'Garam Masala',unit:'tsp',base:1},{e:'🌿',n:'Kasuri Methi',unit:'tsp',base:1},{e:'🧂',n:'Salt & Sugar pinch',unit:'to taste',base:0}],
+    steps:['Marinate chicken with yogurt, ginger-garlic, chilli, salt — 1 hour minimum.','Grill or pan-fry on high heat until charred edges appear. Set aside.','Heat butter. Cook onions till very soft. Add tomatoes, cook till oil separates.','Blend sauce completely smooth. Strain for restaurant-silky texture.','Return to heat. Add chilli, garam masala, pinch of sugar. Simmer 3 min.','Add grilled chicken. Simmer 10 min. Add cream on low heat. Finish with kasuri methi.'],
+    tips:'Grilling the chicken till slightly charred is THE secret ingredient. Never skip this step — it creates the smoky depth you taste in restaurants!',
+    time:'45 min',cal:'560 kcal',nut:{Protein:'35g',Carbs:'18g',Fat:'38g',Fibre:'4g'}
+  },
+  'Palak Paneer':{
+    fresh:[{e:'🧀',n:'Paneer',qty:'per',unit:'g',base:200,price:3.5},{e:'🥬',n:'Fresh Spinach',qty:'per',unit:'g',base:250,price:1.5},{e:'🧅',n:'Onion',qty:'per',unit:'pcs',base:1,price:8},{e:'🍅',n:'Tomato',qty:'per',unit:'pcs',base:1,price:6},{e:'🧄',n:'Garlic Cloves',qty:'flat',unit:'cloves',base:4,price:2},{e:'🫚',n:'Fresh Ginger',qty:'flat',unit:'inch',base:1,price:3},{e:'🥛',n:'Fresh Cream',qty:'flat',unit:'tbsp',base:2,price:0.2}],
+    pantry:[{e:'🌶️',n:'Green Chillies',unit:'pcs',base:2,spice:true},{e:'🫙',n:'Garam Masala',unit:'tsp',base:0.5},{e:'🫚',n:'Oil / Ghee',unit:'tbsp',base:2},{e:'🧂',n:'Salt',unit:'to taste',base:0}],
+    steps:['Blanch spinach 2 min in boiling water. Immediately ice bath (locks bright green colour).','Drain and blend smooth with green chillies.','Heat oil. Sauté onion till golden. Add garlic and ginger 2 min. Add tomato. Cook till soft.','Pour spinach puree. Mix well. Simmer 5 min.','Add paneer (lightly pan-fried preferred). Add cream on low heat 2 min. Serve hot.'],
+    tips:'The ice bath after blanching is essential — it keeps spinach vivid green. Never boil the gravy after adding cream.',
+    time:'35 min',cal:'380 kcal',nut:{Protein:'20g',Carbs:'14g',Fat:'26g',Fibre:'8g'}
+  },
+  'Aloo Gobi':{
+    fresh:[{e:'🥔',n:'Potatoes',qty:'per',unit:'pcs',base:2,price:8},{e:'🥦',n:'Cauliflower',qty:'per',unit:'small',base:1,price:20},{e:'🌿',n:'Fresh Coriander',qty:'flat',unit:'bunch',base:1,price:8}],
+    pantry:[{e:'🌿',n:'Cumin Seeds',unit:'tsp',base:1},{e:'💛',n:'Turmeric Powder',unit:'tsp',base:1},{e:'🌶️',n:'Red Chilli Powder',unit:'tsp',base:1,spice:true},{e:'🌿',n:'Coriander Powder',unit:'tsp',base:1},{e:'🫚',n:'Oil / Ghee',unit:'tbsp',base:2},{e:'🧂',n:'Salt',unit:'to taste',base:0}],
+    steps:['Cut potatoes and cauliflower into similar-sized pieces.','Heat oil. Add cumin seeds till they splutter.','Add potatoes, cook 5 min covered on medium heat.','Add cauliflower, all spices, salt. Mix well.','Cover and cook on low heat 15 min, stirring occasionally.','Garnish fresh coriander. Serve hot.'],
+    tips:'No water needed — let it cook in its own steam on low heat. This keeps it dry and crispy, not soggy.',
+    time:'30 min',cal:'220 kcal',nut:{Protein:'6g',Carbs:'38g',Fat:'8g',Fibre:'6g'}
+  },
+  'Egg Bhurji':{
+    fresh:[{e:'🥚',n:'Eggs',qty:'per',unit:'pcs',base:2,price:6},{e:'🧅',n:'Onion',qty:'per',unit:'pcs',base:1,price:8},{e:'🍅',n:'Tomato',qty:'per',unit:'pcs',base:1,price:6},{e:'🌿',n:'Fresh Coriander',qty:'flat',unit:'bunch',base:1,price:8}],
+    pantry:[{e:'🌶️',n:'Green Chillies',unit:'pcs',base:2,spice:true},{e:'🌿',n:'Cumin Seeds',unit:'tsp',base:0.5},{e:'💛',n:'Turmeric Powder',unit:'tsp',base:0.25},{e:'🫚',n:'Oil / Ghee',unit:'tbsp',base:1},{e:'🧂',n:'Salt & Pepper',unit:'to taste',base:0}],
+    steps:['Beat eggs well with salt and pepper.','Heat oil. Add cumin seeds.','Sauté chopped onion and chillies 3 min.','Add tomato and turmeric. Cook 2 min.','Pour beaten eggs. Scramble on medium heat continuously.','Add coriander. Serve hot with bread or roti.'],
+    tips:'Keep stirring continuously on medium heat — this makes bhurji soft and fluffy, not rubbery.',
+    time:'15 min',cal:'280 kcal',nut:{Protein:'18g',Carbs:'10g',Fat:'18g',Fibre:'2g'}
+  },
+  'Khichdi':{
+    fresh:[{e:'🌾',n:'Basmati / Regular Rice',qty:'per',unit:'g',base:80,price:0.8},{e:'🫘',n:'Yellow Moong Dal',qty:'per',unit:'g',base:40,price:0.8}],
+    pantry:[{e:'🫚',n:'Ghee',unit:'tbsp',base:2},{e:'🌿',n:'Cumin Seeds',unit:'tsp',base:1},{e:'💛',n:'Turmeric Powder',unit:'tsp',base:0.5},{e:'🧂',n:'Salt',unit:'to taste',base:0},{e:'🌿',n:'Asafoetida',unit:'pinch',base:1}],
+    steps:['Wash rice and moong dal together thoroughly.','Heat ghee in pressure cooker. Add cumin and asafoetida.','Add washed rice and dal. Stir 1 min.','Add turmeric, salt, 3 cups water.','Pressure cook 3 whistles on medium heat.','Add extra ghee before serving. Pair with pickle and papad.'],
+    tips:'Khichdi is comfort food — do not shy on the ghee! A generous drizzle before serving makes it irresistible.',
+    time:'20 min',cal:'280 kcal',nut:{Protein:'10g',Carbs:'48g',Fat:'8g',Fibre:'4g'}
+  },
+};
+
+function makeGenericTpl(dish, spice){
+  return {
+    fresh:[{e:'🍲',n:'Main ingredient for '+dish,qty:'per',unit:'g',base:200,price:3},{e:'🧅',n:'Onions',qty:'per',unit:'pcs',base:2,price:6},{e:'🍅',n:'Tomatoes',qty:'per',unit:'pcs',base:2,price:6},{e:'🌿',n:'Fresh Coriander',qty:'flat',unit:'bunch',base:1,price:8}],
+    pantry:[{e:'🫙',n:'Ginger-Garlic Paste',unit:'tbsp',base:2},{e:'🫚',n:'Oil / Ghee',unit:'tbsp',base:3},{e:'🌶️',n:'Red Chilli Powder',unit:'tsp',base:spice,spice:true},{e:'💛',n:'Turmeric Powder',unit:'tsp',base:0.5},{e:'🫙',n:'Garam Masala',unit:'tsp',base:1},{e:'🌿',n:'Coriander Powder',unit:'tsp',base:1},{e:'🧂',n:'Salt',unit:'to taste',base:0}],
+    steps:['Heat oil in a heavy-bottomed pan on medium heat.','Add finely chopped onions. Fry till golden brown (8–10 min).','Add ginger-garlic paste. Sauté 2 min until raw smell goes.','Add tomatoes. Cook till soft and oil separates (5–6 min).','Add turmeric, chilli powder, coriander powder. Cook 1 min.','Add main ingredient. Coat well with masala. Add half cup water per person.','Cover and cook on low-medium heat 12–15 min.','Add garam masala. Adjust seasoning. Garnish coriander. Serve hot.'],
+    tips:'Always bloom spices in hot oil before adding wet ingredients — this releases maximum flavour.',
+    time:'35 min',cal:'380 kcal',nut:{Protein:'15g',Carbs:'35g',Fat:'18g',Fibre:'6g'}
+  };
+}
+
+const NUTR=[{n:'Protein',v:72,col:'#16a34a'},{n:'Carbohydrates',v:58,col:'#f59e0b'},{n:'Fats',v:44,col:'#ef4444'},{n:'Fibre',v:81,col:'#2563eb'}];
+const VITS=[{n:'Vitamin C',v:65,col:'#f97316'},{n:'Vitamin D',v:30,col:'#eab308'},{n:'Iron',v:58,col:'#dc2626'},{n:'Calcium',v:70,col:'#8b5cf6'}];
+const NOTIFS=[
+  {ico:'🍳',title:'New recipe added!',sub:'Try our new Mutton Curry recipe',time:'2m ago',unread:true},
+  {ico:'💧',title:'Hydration reminder',sub:'You have had only 4 glasses today',time:'1h ago',unread:true},
+  {ico:'🛒',title:'Grocery reminder',sub:'Milk is running low in your list',time:'3h ago',unread:true},
+  {ico:'🎉',title:'10 meals this month!',sub:'Amazing consistency — keep it up!',time:'Yesterday',unread:false},
+];
+const ACTS=[
+  {ico:'🍛',bg:'#dcfce7',title:'Cooked Paneer Butter Masala',time:'Today, 1:30 PM',right:'420 kcal'},
+  {ico:'🛒',bg:'#dbeafe',title:'Updated shopping list',time:'Today, 11:00 AM',right:'5 items'},
+  {ico:'💧',bg:'#e0f2fe',title:'Logged 6 glasses of water',time:'Today, 9:00 AM',right:'75% goal'},
+  {ico:'🥘',bg:'#fef3c7',title:'Cooked Dal Tadka',time:'Yesterday, 7:30 PM',right:'310 kcal'},
+];
+const CHAT_REPLIES=[
+  'Always bloom your spices in hot oil before adding wet ingredients — this releases essential oils and creates the depth of flavour you get in restaurants! 🌶️',
+  'For perfect curry, cook onions until truly golden brown (at least 10 min). Under-cooked onions are the #1 reason homemade curry does not taste like restaurant food. 🍳',
+  'Add a small pinch of sugar to any tomato-based gravy — it neutralises acidity and rounds out the flavour without making it sweet. ✨',
+  'Restaurant dhaba secret: pour a very hot ghee tadka over dal just before serving. The sizzle releases all the aroma. Use ghee — not oil! 🧈',
+  'For seniors: the best dishes are Chicken Haleem (ultra-tender, no chewing needed), Murgh Shorba (light healing broth), and soft Dal Khichdi. All easy to digest and full of protein. 🧓',
+  'For kids: keep spice level 1 (mild). Include ghee daily for brain development, paneer and milk for calcium, dal for iron. Banana oat pancakes make a great no-sugar breakfast! 🧒',
+  'For teens: eat dal at least once daily for iron. Girls especially need iron during puberty. Paneer tikka and grilled chicken are great high-protein options. 🧑',
+  'Chicken Haleem tip: the secret is slow-cooking broken wheat with chicken till it becomes a smooth porridge. Stir constantly in the last 20 min. The consistency should be like thick soup. 🍲',
+  'To keep paneer soft and intact: soak it in warm salted water for 15 min before cooking. It absorbs moisture and will not crumble when added to hot gravy. 🧀',
+  'Perfect biryani dum tip: seal the pot lid with dough or foil before dum cooking. Rest 10 min after turning off heat. This trapped steam finishes cooking perfectly. 🍚',
+  'For the smoothest restaurant-quality gravy: strain your blended sauce through a fine sieve. This removes seeds and skin, giving you silky hotel-style texture. 🍛',
+  'Weight loss cooking tip: air-fry instead of deep frying (uses 80% less oil), use yogurt instead of cream in curries, and add spinach/greens to bulk up dishes without adding calories. 💪',
+  'For cooking soft foods for seniors: pressure cook one extra whistle beyond normal time. Mash lightly with back of spoon. Use minimal salt and fresh herbs for flavour instead. 🧓❤️',
+];
+
+/* ═══ STATE ═══ */
+let groceries=[{id:1,text:'Onions',done:false,price:15},{id:2,text:'Tomatoes',done:false,price:12},{id:3,text:'Paneer 200g',done:true,price:80}];
+let meals=[{id:1,text:'Breakfast – Poha 250 kcal',done:false}];
+let cartItems=[],gc=4,mc=2,wg=6;
+let likedIds=new Set(),sideOpen=true,chatTyping=false,pplCount=2;
+let timerSec=0,timerMax=0,timerInt=null,timerRunning=false;
+let calData={consumed:0,p:0,c:0,f:0};
+let calFoodLog=[],calLogId=1;
+let userDiet='veg',userAge=0;
+
+/* ═══ INIT ═══ */
+window.addEventListener('DOMContentLoaded',()=>{
+  const name = localStorage.getItem('userName') || 'Chef';
+  userDiet   = localStorage.getItem('userDiet')  || 'veg';
+  userAge    = parseInt(localStorage.getItem('userAge')) || 0;
+
+  document.getElementById('wuser').textContent = '👋 Welcome back, ' + name + '!';
+  document.getElementById('navName').textContent = name.split(' ')[0];
+  document.getElementById('navAv').textContent = name.charAt(0).toUpperCase();
+
+  const dm={veg:'🥦 Vegetarian recipes crafted just for you.',nonveg:'🍗 Non-veg recipes for today.',egg:'🥚 Eggetarian meal ideas ready for today.',jain:'🪷 Pure Jain recipes — wholesome and delicious.'};
+  document.getElementById('dinfo').textContent = dm[userDiet] || 'Personalised recipes for you.';
+
+  const tm={nonveg:'dnv',egg:'deg',jain:'djn'};
+  if(tm[userDiet]) document.getElementById('body').classList.add(tm[userDiet]);
+  if(localStorage.getItem('darkMode')==='true'){document.getElementById('body').classList.add('dark');document.getElementById('dkbtn').textContent='☀️';}
+
+  const dm2={veg:'Vegetarian',nonveg:'Non-Vegetarian',egg:'Eggetarian',jain:'Jain'};
+  document.getElementById('gDiet').value = dm2[userDiet] || 'Vegetarian';
+  document.getElementById('pdiet').value = userDiet;
+
+  buildChips('fc1','rg1');
+  buildChips('fc2','rg2');
+  renderR('rg1','');
+  renderR('rg2','');
+  renderG('gl1');
+  renderShopList();
+  renderNB('nb1',NUTR);renderNB('nb2',NUTR);renderNB('nb3',NUTR);renderNB('nb4',VITS);
+  renderMealDays();renderNotifs();renderActs();renderMealLog();renderHydration();
+  loadProfile();renderCart();
+  setupCal();
+  showAgeTip();
+});
+
+/* AGE SUGGESTION BANNER */
+function showAgeTip(){
+  if(!userAge || userAge<1) return;
+  const g = getAgeGroup(userAge);
+  if(!g) return;
+  const tip = document.getElementById('ageTip');
+  tip.className = 'age-tip ' + g.tipClass;
+  document.getElementById('atIco').textContent = g.ico;
+  document.getElementById('atTitle').style.color = '';
+  document.getElementById('atTitle').textContent = g.title;
+  document.getElementById('atSub').textContent = g.sub;
+  document.getElementById('atGoals').innerHTML = g.goals.map(gl=>`<span class="at-goal">${gl.l}</span>`).join('');
+  // Food chips for quick logging — diet-aware
+  const fw = document.getElementById('atFoodsWrap');
+  const fc = document.getElementById('atFoodChips');
+  const ageKey = getAgeKey();
+  const ageFoods = getAgeFoods(ageKey, userDiet);
+  fc.innerHTML = ageFoods.map(f=>`<div class="at-food-chip" onclick="logFoodFromTip('${f.n.replace(/'/g,"\'")}',${f.cal},${f.p},${f.c},${f.f})">${f.n} <b>+${f.cal}</b></div>`).join('');
+  fw.style.display='block';
+  tip.classList.add('show');
+}
+
+function logFoodFromTip(name,cal,p,c,f){
+  logCalFood(name,cal,p,c,f);
+  showToast('Logged '+name+' (+'+cal+' kcal) ✅','ok');
+}
+
+function onAgeChange(val){
+  userAge = parseInt(val) || 0;
+  showAgeTip();
+  setupCal();
+}
+
+/* Return age key for current user age */
+function getAgeKey(){
+  if(userAge>=1&&userAge<=12)  return 'child';
+  if(userAge>=13&&userAge<=19) return 'teen';
+  if(userAge>=20&&userAge<=59) return 'adult';
+  if(userAge>=60)              return 'senior';
+  return 'adult';
+}
+
+/* CALORIE TRACKER — AGE-BASED */
+function setupCal(){
+  const g = getAgeGroup(userAge) || AGE_GROUPS.adult;
+  // Update ring goal label
+  const lbl = document.getElementById('calGoalLbl');
+  if(lbl) lbl.textContent = 'of ' + g.calGoal;
+  // Banner
+  const banner = document.getElementById('ageCalBanner');
+  if(banner){
+    const isDark=document.getElementById('body').classList.contains('dark');
+    const colors={child:`background:rgba(52,211,153,${isDark?.15:.1});border-color:#6ee7b7;color:${isDark?'#6ee7b7':'#065f46'}`,teen:`background:rgba(59,130,246,${isDark?.15:.1});border-color:#93c5fd;color:${isDark?'#93c5fd':'#1e40af'}`,adult:`background:rgba(245,158,11,${isDark?.15:.1});border-color:#fcd34d;color:${isDark?'#fcd34d':'#92400e'}`,senior:`background:rgba(167,139,250,${isDark?.15:.1});border-color:#d8b4fe;color:${isDark?'#d8b4fe':'#6b21a8'}`};
+    const ageKey = userAge<13?'child':userAge<20?'teen':userAge<60?'adult':'senior';
+    banner.style.cssText = colors[ageKey] || colors.adult;
+    banner.innerHTML = `<div class="acb-title">${g.ico} ${g.title}</div>Daily target: <b>${g.calGoal} kcal</b> · Protein <b>${g.pGoal}g</b> · Carbs <b>${g.cGoal}g</b> · Fat <b>${g.fGoal}g</b>`;
+  }
+  // Food buttons — diet-aware
+  const btns = document.getElementById('calFoodBtns');
+  if(btns){
+    const ageKey2 = getAgeKey();
+    const ageFoods2 = getAgeFoods(ageKey2, userDiet);
+    btns.innerHTML = ageFoods2.map(f=>`<button class="clbtn" onclick="logCalFood('${f.n.replace(/'/g,"\'")}',${f.cal},${f.p},${f.c},${f.f})">${f.n} +${f.cal}</button>`).join('');
+  }
+  updateCalUI();
+}
+
+function logCalFood(name,cal,p,c,f){
+  calData.consumed+=cal;calData.p+=p;calData.c+=c;calData.f+=f;
+  calFoodLog.unshift({id:calLogId++,name,cal,p,c,f,time:new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})});
+  updateCalUI();
+  document.getElementById('sv-cal').textContent=calData.consumed.toLocaleString();
+  document.getElementById('calTrendLbl').textContent='↑ '+calData.consumed+' kcal logged';
+  document.getElementById('calTrendLbl').className='strend up';
+}
+
+function updateCalUI(){
+  const g = getAgeGroup(userAge) || AGE_GROUPS.adult;
+  const pct = Math.min(100, Math.round((calData.consumed/g.calGoal)*100));
+  const circ = document.getElementById('calCircle');
+  if(circ){const r=52,dash=2*Math.PI*r;circ.style.strokeDashoffset=dash-(dash*pct/100);}
+  const cv = document.getElementById('calConsumed');if(cv)cv.textContent=calData.consumed.toLocaleString();
+  const setM=(id,val,max,fid)=>{const e=document.getElementById(id),f=document.getElementById(fid);if(e)e.textContent=val+'g / '+max+'g';if(f)f.style.width=Math.min(100,Math.round(val/max*100))+'%';};
+  setM('cm-p',calData.p,g.pGoal,'cf-p');setM('cm-c',calData.c,g.cGoal,'cf-c');setM('cm-f',calData.f,g.fGoal,'cf-f');
+  const log=document.getElementById('calfoodlog');
+  if(log){
+    if(!calFoodLog.length){log.innerHTML='<li class="gitem"><label style="color:var(--muted)">No food logged yet. Tap a button above!</label></li>';return;}
+    log.innerHTML=calFoodLog.map(fd=>`<li class="gitem"><label style="font-weight:700">${fd.name}</label><span style="margin-left:auto;font-size:.76rem;font-weight:700;color:var(--p)">+${fd.cal} kcal</span><button class="dx" onclick="removeCalLog(${fd.id})">🗑</button></li>`).join('');
+  }
+}
+function removeCalLog(id){const fd=calFoodLog.find(x=>x.id===id);if(fd){calData.consumed-=fd.cal;calData.p-=fd.p;calData.c-=fd.c;calData.f-=fd.f;}calFoodLog=calFoodLog.filter(x=>x.id!==id);updateCalUI();document.getElementById('sv-cal').textContent=calData.consumed.toLocaleString();}
+function resetCal(){calData={consumed:0,p:0,c:0,f:0};calFoodLog=[];updateCalUI();document.getElementById('sv-cal').textContent='0';document.getElementById('calTrendLbl').textContent='↓ Log a meal';document.getElementById('calTrendLbl').className='strend dn';showToast('Calorie tracker reset','info');}
+
+/* SECTIONS */
+const ALL_SECS=['home','recipes','planner','cal','diet','nutri','hydro','favs','groc','activity'];
+function showSec(n){
+  ALL_SECS.forEach(s=>{document.getElementById('sec-'+s).style.display=s===n?'':'none';});
+  document.getElementById('bannerWrap').style.display=n==='home'?'':'none';
+  if(n==='favs')renderFavs();
+  if(n==='groc')renderShopList();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* DIET FILTER CHIPS */
+function buildChips(cid, gid){
+  const chips = DIET_CHIPS[userDiet] || DIET_CHIPS.veg;
+  const el = document.getElementById(cid);if(!el)return;
+  el.innerHTML = chips.map((c,i)=>`<div class="fc ${i===0?'on':''}" onclick="filterDiet('${gid}','${cid}',this,'${c.f}')">${c.l}</div>`).join('');
+}
+
+/* RECIPE CARDS */
+const BL={veg:'🥦 Veg',nonveg:'🍗 Non-Veg',egg:'🥚 Egg',jain:'🪷 Jain'};
+const BC={veg:'',nonveg:'nv',egg:'eg',jain:'jn'};
+
+function rCard(r){
+  const stars='★'.repeat(Math.floor(r.stars))+'☆'.repeat(5-Math.floor(r.stars));
+  return `<div class="rcard" onclick="openMod(${r.id})">
+    <div class="rthumb"><span class="rthumb-emoji">${r.e}</span>
+      <button class="rfav ${likedIds.has(r.id)?'liked':''}" onclick="event.stopPropagation();toggleFav(${r.id},this)">${likedIds.has(r.id)?'❤️':'🤍'}</button>
+      <div class="rtime-badge">⏱ ${r.t}</div>
+    </div>
+    <div class="rinfo"><h4>${r.name}</h4>
+      <div class="rmeta"><span class="rbadge ${BC[r.diet]}">${BL[r.diet]}</span><span style="font-size:.72rem;font-weight:700;color:var(--muted)">${r.d}</span></div>
+      <div style="font-size:.72rem;color:var(--muted);margin-top:3px">🔥 ${r.c}</div>
+      <div class="rstars">${stars} <span style="color:var(--muted);font-size:.68rem">${r.stars}</span></div>
+    </div>
+  </div>`;
+}
+
+function renderR(gid, filter){
+  /* Only show recipes the user's diet allows */
+  const compat = DIET_COMPAT[userDiet] || ['veg','jain'];
+  let list = RDB.filter(r => compat.includes(r.diet));
+  if(filter==='easy') list = list.filter(r => r.tm<=20);
+  else if(filter)     list = list.filter(r => r.diet===filter);
+  else list.sort((a,b) => (b.diet===userDiet?1:0)-(a.diet===userDiet?1:0));
+  const el=document.getElementById(gid);
+  if(el) el.innerHTML = list.length ? list.map(rCard).join('') : `<div style="grid-column:1/-1;text-align:center;padding:30px;color:var(--muted)">No recipes for this filter.</div>`;
+  const cnt=document.getElementById('recipe-count');if(cnt)cnt.textContent=list.length+' recipes';
+}
+
+function filterDiet(gid,cid,el,filter){
+  document.querySelectorAll('#'+cid+' .fc').forEach(c=>c.classList.remove('on'));el.classList.add('on');
+  renderR(gid,filter);
+}
+
+function toggleFav(id,btn){
+  if(likedIds.has(id)){likedIds.delete(id);btn.textContent='🤍';btn.classList.remove('liked');showToast('Removed from favourites','info');}
+  else{likedIds.add(id);btn.textContent='❤️';btn.classList.add('liked');showToast('Saved to favourites ❤️','ok');document.getElementById('sv-r').textContent=24+likedIds.size;}
+}
+
+function renderFavs(){
+  const grid=document.getElementById('favgrid'),empty=document.getElementById('fav-empty'),fc=document.getElementById('fav-count');
+  if(!likedIds.size){grid.innerHTML='';empty.style.display='block';if(fc)fc.textContent='';return;}
+  empty.style.display='none';
+  grid.innerHTML=RDB.filter(r=>likedIds.has(r.id)).map(rCard).join('');
+  if(fc)fc.textContent=likedIds.size+' saved';
+}
+
+/* RECIPE MODAL */
+function openMod(id){
+  const r=RDB.find(x=>x.id===id);if(!r)return;
+  document.getElementById('modbox').innerHTML=`
+    <div class="mthumb">${r.e}</div>
+    <div class="mbody"><h2>${r.name}</h2>
+      <div class="mtags"><span class="mtag">⏱ ${r.t}</span><span class="mtag">🔥 ${r.c}</span><span class="mtag">${r.d}</span><span class="mtag rbadge ${BC[r.diet]}">${BL[r.diet]}</span><span class="mtag">⭐ ${r.stars}</span></div>
+      <p class="mdesc">${r.desc}</p>
+      <div class="mingr"><h4>Ingredients</h4><ul>${r.ingredients.map(i=>`<li>${i}</li>`).join('')}</ul></div>
+      <div class="msteps"><h4>Cooking Steps</h4>${r.steps.map((s,i)=>`<div class="mstep-row"><div class="mstep-n">${i+1}</div><span>${s}</span></div>`).join('')}</div>
+      <div class="mbtns">
+        <button class="mbtn ai" onclick="openAIWithDish('${r.name}')">✨ AI Full Recipe</button>
+        <button class="mbtn fv" onclick="toggleFavById(${r.id})">${likedIds.has(r.id)?'❤️ Saved':'🤍 Save'}</button>
+        <button class="mbtn gr" onclick="startTimer(${r.tm}*60,'${r.name}');closeMod()">⏱ Start Timer</button>
+        <button class="mbtn cl" onclick="closeMod()">Close</button>
+      </div>
+    </div>`;
+  document.getElementById('modov').classList.add('on');
+}
+function closeMod(){document.getElementById('modov').classList.remove('on');}
+function handleModOv(e){if(e.target===document.getElementById('modov'))closeMod();}
+function toggleFavById(id){const liked=likedIds.has(id);liked?likedIds.delete(id):likedIds.add(id);const btn=document.querySelector('.mbtn.fv');if(btn)btn.textContent=likedIds.has(id)?'❤️ Saved':'🤍 Save';}
+function openAIWithDish(name){closeMod();document.getElementById('gDish').value=name;openAI();}
+
+/* AI PANEL */
+/* ════════════════ AI FUNCTIONS — FIXED & COMPLETE ════════════════ */
+function openAI(){
+  document.getElementById('aiov').classList.add('on');
+  // Auto-init today's meal tab date
+  const d=new Date();
+  const el=document.getElementById('mtwDate');
+  if(el)el.textContent=d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  // Init Find tab
+  doAISearch();
+  // Auto-select age group on age tab
+  const key=getAgeKey();
+  const cards=document.querySelectorAll('.ast-card');
+  if(cards.length){const m={child:0,teen:1,adult:2,senior:3};pickAgeGroup(key,cards[m[key]||2]);}
+}
+function closeAI(){document.getElementById('aiov').classList.remove('on');}
+function handleAIOv(e){if(e.target===document.getElementById('aiov'))closeAI();}
+
+/* ── Tab Switcher (NEW — uses tc-* IDs matching the HTML) ── */
+function switchAITab(name, el){
+  document.querySelectorAll('.ai-tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.ai-tc').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  const tc = document.getElementById('tc-'+name);
+  if(tc) tc.classList.add('on');
+  if(name==='today') genTodayMeal();
+  if(name==='find')  doAISearch();
+}
+
+/* ── Spice ── */
+function updateSpice(){
+  const v=parseInt(document.getElementById('gSpice').value);
+  const L=['','😌 Mild','🙂 Light Spicy','😋 Medium Spice','🥵 Hot','🔥 Extra Hot'];
+  document.getElementById('spiceBadge').textContent=L[v]||'😋 Medium';
+}
+
+/* ── People counter ── */
+function changePpl(d){pplCount=Math.max(1,Math.min(20,pplCount+d));document.getElementById('pplval').textContent=pplCount;}
+
+/* ── Dish input → live suggest bar update ── */
+function onDishInput(){
+  const dish = (document.getElementById('gDish').value||'').trim();
+  const el   = document.getElementById('aiSuggestTxt');
+  if(!el) return;
+  if(!dish){
+    el.innerHTML='Enter a dish name below — the AI will generate <strong>exact quantities, prices, steps and chef tips</strong>.';
+    return;
+  }
+  const known = Object.keys(RTPL).find(k=>dish.toLowerCase().includes(k.toLowerCase()));
+  if(known)
+    el.innerHTML='✅ "<strong>'+known+'</strong>" has a detailed template — will show exact authentic ingredients and chef tips!';
+  else
+    el.innerHTML='🤖 Will generate a complete recipe for "<strong>'+dish+'</strong>" with scaled ingredients, steps and a cart-ready shopping list.';
+}
+
+/* ── Presets ── */
+function applyPreset(el, preset){
+  document.querySelectorAll('.preset-chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  const spiceEl=document.getElementById('gSpice');
+  const timeEl =document.getElementById('gTime');
+  const occEl  =document.getElementById('gOcc');
+  switch(preset){
+    case 'quick':
+      timeEl.value='15'; occEl.value='Quick Lunch'; break;
+    case 'healthy':
+      occEl.value='Weight Loss'; spiceEl.value='2'; updateSpice(); break;
+    case 'highprotein':
+      occEl.value='Everyday Meal'; break;
+    case 'comfort':
+      spiceEl.value='3'; updateSpice(); occEl.value='Everyday Meal'; break;
+    case 'kids':
+      spiceEl.value='1'; updateSpice(); occEl.value='Kid Friendly'; break;
+    case 'senior':
+      spiceEl.value='2'; updateSpice(); occEl.value='Senior Friendly'; break;
+  }
+  showToast('Preset applied ✓','info');
+}
+
+/* ── Age key from userAge ── */
+function getAgeKey(){
+  const a=parseInt(userAge)||0;
+  if(a>=1&&a<=12) return 'child';
+  if(a>=13&&a<=19)return 'teen';
+  if(a>=20&&a<=59)return 'adult';
+  if(a>=60)        return 'senior';
+  return 'adult';
+}
+
+/* ── Age Suggestions Tab ── */
+const AGE_SUGGEST_DISHES={
+  child:{
+    veg:[
+      {e:'🥞',n:'Banana Oat Pancakes',sub:'No sugar, healthy fats, kids love it',tag:'No Sugar'},
+      {e:'🍲',n:'Vegetable Khichdi',sub:'Colourful veggies, mild, soft and nutritious',tag:'Soft & Healthy'},
+      {e:'🫓',n:'Paneer Paratha',sub:'High calcium & protein for growing bones',tag:'High Calcium'},
+      {e:'🥛',n:'Warm Turmeric Milk',sub:'Immunity booster — best before bedtime',tag:'Immunity'},
+      {e:'🍚',n:'Dal Chawal',sub:'Complete protein + carbs combination',tag:'Complete Meal'},
+      {e:'🧀',n:'Paneer Tikka',sub:'Grilled, protein-rich — no deep frying',tag:'Protein Rich'},
+    ],
+    nonveg:[
+      {e:'🍗',n:'Soft Chicken Soup',sub:'Easy to digest, protein-rich warm broth',tag:'Soft & Easy'},
+      {e:'🥞',n:'Banana Oat Pancakes',sub:'Healthy breakfast, zero added sugar',tag:'Healthy'},
+      {e:'🍲',n:'Chicken Khichdi',sub:'Complete one-pot nutrition for kids',tag:'Complete Meal'},
+      {e:'🥚',n:'Soft Boiled Eggs',sub:'Best protein source for growth',tag:'Protein'},
+      {e:'🍳',n:'Egg Fried Rice (mild)',sub:'Protein + carbs — kids love it',tag:'Favourite'},
+      {e:'🧀',n:'Paneer Paratha',sub:'Calcium-rich, soft, filling',tag:'Calcium'},
+    ],
+    egg:[
+      {e:'🥞',n:'Banana Oat Pancakes',sub:'No sugar, healthy fats',tag:'Healthy'},
+      {e:'🍳',n:'Soft Scrambled Eggs',sub:'Quick protein-rich breakfast',tag:'Quick Protein'},
+      {e:'🍲',n:'Vegetable Khichdi',sub:'Mild, soft, nutritious',tag:'Soft'},
+      {e:'🥚',n:'Soft Boiled Eggs',sub:'Best protein for growing kids',tag:'Protein'},
+      {e:'🫓',n:'Egg Paratha',sub:'High protein, calcium, filling',tag:'Filling'},
+      {e:'🥛',n:'Warm Milk',sub:'Calcium for strong bones',tag:'Calcium'},
+    ],
+    jain:[
+      {e:'🍲',n:'Khichdi',sub:'Gentle, soft, complete nutrition',tag:'Soft & Complete'},
+      {e:'🧀',n:'Paneer Paratha',sub:'Calcium for growing bones',tag:'Calcium'},
+      {e:'🥛',n:'Warm Milk + Saffron',sub:'Immunity, sleep, brain health',tag:'Immunity'},
+      {e:'🍚',n:'Dal Chawal (Jain)',sub:'No onion-garlic, full protein',tag:'Jain Safe'},
+      {e:'🥣',n:'Curd Rice',sub:'Probiotic, cooling, digestive',tag:'Digestive'},
+      {e:'🍮',n:'Moong Dal Kheer',sub:'Sweet, nutritious, easy to eat',tag:'Nutritious'},
+    ]
+  },
+  teen:{
+    veg:[
+      {e:'🧀',n:'Paneer Tikka',sub:'28g protein per serving — grilled, not fried',tag:'High Protein'},
+      {e:'🫘',n:'Chole',sub:'Iron + protein — essential for teens',tag:'Iron Rich'},
+      {e:'🥘',n:'Dal Tadka',sub:'Daily iron intake in one bowl',tag:'Daily Iron'},
+      {e:'🫓',n:'Paneer Paratha',sub:'Calcium for bone density',tag:'Bone Health'},
+      {e:'🍚',n:'Veg Biryani',sub:'Balanced carbs + vegetables',tag:'Balanced'},
+      {e:'🌿',n:'Palak Paneer',sub:'Iron + calcium combo — crucial for teen girls',tag:'Iron+Calcium'},
+    ],
+    nonveg:[
+      {e:'🍗',n:'Grilled Chicken',sub:'35g protein per serving — muscle growth',tag:'Muscle Growth'},
+      {e:'🌯',n:'Chicken Wrap',sub:'Portable, high protein, filling',tag:'High Protein'},
+      {e:'🍳',n:'Egg Bhurji',sub:'Quick 18g protein, iron-rich',tag:'Quick Protein'},
+      {e:'🍗',n:'Chicken Biryani',sub:'Complete meal — carbs + protein',tag:'Complete'},
+      {e:'🫘',n:'Dal Tadka',sub:'Essential daily iron especially for girls',tag:'Iron Rich'},
+      {e:'🐟',n:'Grilled Fish Tikka',sub:'Omega-3 for brain and eye health',tag:'Brain Health'},
+    ],
+    egg:[
+      {e:'🍳',n:'Egg Bhurji',sub:'18g protein, quick, iron-rich',tag:'Quick Protein'},
+      {e:'🌯',n:'Egg Roll',sub:'High protein, portable, filling',tag:'Portable'},
+      {e:'🥘',n:'Dal Tadka',sub:'Daily iron for active teens',tag:'Iron Rich'},
+      {e:'🫓',n:'Egg Paratha',sub:'Protein + carbs for energy',tag:'Energy'},
+      {e:'🍳',n:'Boiled Eggs + Toast',sub:'Quick breakfast, complete protein',tag:'Quick'},
+      {e:'🧀',n:'Paneer Tikka',sub:'Calcium + protein combo',tag:'Calcium+Protein'},
+    ],
+    jain:[
+      {e:'🧀',n:'Paneer Tikka',sub:'High protein, grilled, tasty',tag:'High Protein'},
+      {e:'🫘',n:'Chole (Jain)',sub:'Iron + plant protein without garlic',tag:'Iron Rich'},
+      {e:'🫓',n:'Paneer Paratha',sub:'Calcium for bone strength',tag:'Bone Health'},
+      {e:'🍲',n:'Rajma (Jain)',sub:'Plant protein + fibre',tag:'Plant Protein'},
+      {e:'🌿',n:'Palak Paneer',sub:'Iron + calcium — crucial for teen girls',tag:'Iron+Calcium'},
+      {e:'🍚',n:'Veg Biryani (Jain)',sub:'Balanced, satisfying',tag:'Balanced'},
+    ]
+  },
+  adult:{
+    veg:[
+      {e:'🫘',n:'Masoor Dal Soup',sub:'High fibre, heart-healthy, weight-friendly',tag:'Heart Health'},
+      {e:'🌿',n:'Palak Paneer',sub:'Iron + calcium + protein powerhouse',tag:'Nutrition Dense'},
+      {e:'🥬',n:'Saag Aloo',sub:'Iron-rich greens with digestive potato',tag:'Iron Rich'},
+      {e:'🫘',n:'Rajma',sub:'Plant protein, kidney bean fibre',tag:'High Fibre'},
+      {e:'🍛',n:'Paneer Butter Masala',sub:'High protein, satisfying',tag:'Protein'},
+      {e:'🥦',n:'Aloo Gobi',sub:'Low calorie, filling, fibre-rich',tag:'Low Cal'},
+    ],
+    nonveg:[
+      {e:'🐟',n:'Grilled Fish Tikka',sub:'Low fat, high protein, rich in Omega-3',tag:'Weight Loss'},
+      {e:'🍗',n:'Butter Chicken',sub:'High protein, deeply satisfying',tag:'Protein Rich'},
+      {e:'🍖',n:'Mutton Curry',sub:'Iron + zinc — once or twice a week',tag:'Iron+Zinc'},
+      {e:'🍗',n:'Chicken Stew',sub:'Light, digestive, collagen-rich',tag:'Light'},
+      {e:'🍵',n:'Murgh Shorba',sub:'Low calorie, healing broth',tag:'Healing Broth'},
+      {e:'🫘',n:'Masoor Dal Soup',sub:'Plant fibre + protein combo',tag:'Fibre'},
+    ],
+    egg:[
+      {e:'🍳',n:'Masala Omelette',sub:'Quick protein, heart-healthy',tag:'Quick Protein'},
+      {e:'🍚',n:'Egg Fried Rice',sub:'Balanced carbs + protein',tag:'Balanced'},
+      {e:'🌿',n:'Palak Paneer',sub:'Iron + calcium powerhouse',tag:'Nutrition Dense'},
+      {e:'🫘',n:'Rajma',sub:'Plant protein + fibre',tag:'High Fibre'},
+      {e:'🥚',n:'Egg Curry',sub:'Rich, protein-dense curry',tag:'Protein Rich'},
+      {e:'🥗',n:'Egg Salad Bowl',sub:'Low calorie, filling, fresh',tag:'Low Cal'},
+    ],
+    jain:[
+      {e:'🫘',n:'Chole',sub:'Plant protein, heart-healthy',tag:'Heart Health'},
+      {e:'🌿',n:'Palak Paneer',sub:'Iron + calcium + protein',tag:'Nutrition Dense'},
+      {e:'🍚',n:'Veg Biryani (Jain)',sub:'Balanced, aromatic, satisfying',tag:'Balanced'},
+      {e:'🧀',n:'Paneer Tikka',sub:'Grilled protein, calcium-rich',tag:'Protein'},
+      {e:'🫘',n:'Rajma (Jain)',sub:'Plant protein, fibre-rich',tag:'Fibre'},
+      {e:'🫓',n:'Methi Paratha',sub:'Iron-rich fenugreek flatbread',tag:'Iron Rich'},
+    ]
+  },
+  senior:{
+    veg:[
+      {e:'🥣',n:'Soft Dal Khichdi',sub:'Ultra-soft, digestive, low-sodium — perfect daily',tag:'Easy to Digest'},
+      {e:'🍮',n:'Moong Dal Halwa',sub:'Soft, protein-rich, beloved dessert',tag:'Soft Sweet'},
+      {e:'🧀',n:'Steamed Paneer',sub:'Calcium for bones — soft, no chewing needed',tag:'Bone Health'},
+      {e:'🥬',n:'Palak Soup (pureed)',sub:'Iron-rich, smooth, no chewing',tag:'Iron Rich'},
+      {e:'🥣',n:'Oats Porridge',sub:'Fibre-rich, heart-healthy, very soft',tag:'Soft & Easy'},
+      {e:'🍲',n:'Khichdi',sub:'Comfort food, complete protein, gentle',tag:'Comfort'},
+    ],
+    nonveg:[
+      {e:'🍲',n:'Chicken Haleem',sub:'Ultra-tender porridge — absolutely no chewing needed',tag:'No Chewing'},
+      {e:'🍵',n:'Murgh Shorba',sub:'Light healing broth — easy on stomach',tag:'Digestive'},
+      {e:'🍗',n:'Kerala Chicken Stew',sub:'Soft coconut milk stew, very mild spice',tag:'Mild & Soft'},
+      {e:'🥣',n:'Soft Dal Khichdi',sub:'Low sodium, ultra-soft, daily staple',tag:'Daily Staple'},
+      {e:'🍳',n:'Soft Boiled Eggs',sub:'Best easy protein — no chewing',tag:'Easy Protein'},
+      {e:'🍗',n:'Chicken Bone Broth',sub:'Collagen-rich, warming, healing',tag:'Collagen'},
+    ],
+    egg:[
+      {e:'🍳',n:'Soft Boiled Eggs',sub:'Best easy protein, no chewing needed',tag:'Easy Protein'},
+      {e:'🥣',n:'Soft Dal Khichdi',sub:'Digestive, low-sodium, daily staple',tag:'Daily Staple'},
+      {e:'🥚',n:'Egg Drop Soup',sub:'Light, warm, easy to swallow',tag:'Easy to Eat'},
+      {e:'🍳',n:'Scrambled Eggs (soft)',sub:'Soft, nutritious, quick',tag:'Soft'},
+      {e:'🥣',n:'Oats Porridge',sub:'Fibre-rich, heart-healthy',tag:'Heart Health'},
+      {e:'🧀',n:'Steamed Paneer',sub:'Calcium, no chewing, protein',tag:'Bone Health'},
+    ],
+    jain:[
+      {e:'🥣',n:'Soft Dal Khichdi',sub:'Ultra-soft, digestive, Jain-safe',tag:'Easy to Digest'},
+      {e:'🍮',n:'Moong Dal Halwa',sub:'Soft, sweet, protein-rich dessert',tag:'Soft Sweet'},
+      {e:'🧀',n:'Steamed Paneer',sub:'Calcium, easy, no chewing',tag:'Bone Health'},
+      {e:'🥣',n:'Oats Porridge',sub:'Heart-healthy, fibre, soft',tag:'Heart Health'},
+      {e:'🍲',n:'Khichdi',sub:'Jain-safe, complete nutrition, gentle',tag:'Comfort'},
+      {e:'🥬',n:'Lauki Soup (pureed)',sub:'Alkaline, digestive, very mild',tag:'Digestive'},
+    ]
+  }
+};
+
+function pickAgeGroup(key, cardEl){
+  document.querySelectorAll('.ast-card').forEach(c=>c.classList.remove('selected'));
+  if(cardEl) cardEl.classList.add('selected');
+  const dietKey = (userDiet==='nonveg')?'nonveg':(userDiet==='egg')?'egg':(userDiet==='jain')?'jain':'veg';
+  const dishes = AGE_SUGGEST_DISHES[key]?.[dietKey] || AGE_SUGGEST_DISHES[key]?.veg || [];
+  const wrap = document.getElementById('astDishesWrap');
+  const hdr  = document.getElementById('astDishesHdr');
+  const cont = document.getElementById('astDishes');
+  if(!cont) return;
+  const labels = {child:'Kids',teen:'Teens',adult:'Adults',senior:'Seniors (60+)'};
+  if(hdr) hdr.innerHTML = '🍽️ Best dishes for ' + labels[key] + ' · ' + (userDiet==='veg'?'Vegetarian':userDiet==='nonveg'?'Non-Veg':userDiet==='egg'?'Eggetarian':'Jain');
+  cont.innerHTML = dishes.map(d=>`
+    <div class="ast-dish-row" onclick="generateFromAgeTab('${d.n.replace(/'/g,"\\'")}')">
+      <div class="ast-dish-ico">${d.e}</div>
+      <div class="ast-dish-info">
+        <div class="ast-dish-name">${d.n}</div>
+        <div class="ast-dish-sub">${d.sub}</div>
+      </div>
+      <span class="ast-dish-tag">${d.tag}</span>
+      <button class="ast-dish-btn" onclick="event.stopPropagation();generateFromAgeTab('${d.n.replace(/'/g,"\\'")}')">✨ Cook</button>
+    </div>`).join('');
+  if(wrap) wrap.style.display='block';
+}
+
+function generateFromAgeTab(dishName){
+  document.getElementById('gDish').value = dishName;
+  switchAITab('gen', document.getElementById('tabGen'));
+  onDishInput();
+  showToast('Setting up recipe for "'+dishName+'"…','pur');
+  setTimeout(()=>generateRecipe(), 350);
+}
+
+/* ── Find / Search / Filter ── */
+function doAISearch(){
+  const q    = (document.getElementById('sfSearch')?.value||'').trim().toLowerCase();
+  const diet = document.getElementById('sfDiet')?.value||'';
+  const time = parseInt(document.getElementById('sfTime')?.value)||0;
+  const compat= DIET_COMPAT[userDiet]||['veg','jain'];
+  
+  let results = RDB.filter(r=>{
+    if(!compat.includes(r.diet)) return false;
+    if(diet && r.diet!==diet) return false;
+    if(time && r.tm>time) return false;
+    if(q && !r.name.toLowerCase().includes(q) && !r.desc.toLowerCase().includes(q) && !r.diet.includes(q)) return false;
+    return true;
+  });
+  
+  const container = document.getElementById('sfResults');
+  if(!container) return;
+  if(!results.length){
+    container.innerHTML='<div class="sf-no-results">😕 No recipes found for these filters. Try adjusting your search.</div>';
+    return;
+  }
+  const BL2={veg:'🥦 Veg',nonveg:'🍗 Non-Veg',egg:'🥚 Egg',jain:'🪷 Jain'};
+  container.innerHTML=results.map(r=>`
+    <div class="sf-card" onclick="generateFromAgeTab('${r.name.replace(/'/g,"\\'")}')">
+      <div class="sf-card-top">
+        <div class="sf-card-ico">${r.e}</div>
+        <div class="sf-card-name">${r.name}</div>
+      </div>
+      <div class="sf-card-meta">
+        <span class="sf-meta-tag diet">${BL2[r.diet]||r.diet}</span>
+        <span class="sf-meta-tag time">⏱ ${r.t}</span>
+        <span class="sf-meta-tag cal">🔥 ${r.c}</span>
+      </div>
+    </div>`).join('');
+}
+
+/* ── Today's Meal Plan ── */
+function genTodayMeal(){
+  const compat = DIET_COMPAT[userDiet]||['veg','jain'];
+  const pool   = RDB.filter(r=>compat.includes(r.diet));
+  if(pool.length<3){showToast('Not enough recipes for meal plan','warn');return;}
+  
+  const d=new Date();
+  const el=document.getElementById('mtwDate');
+  if(el)el.textContent=d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  
+  // Pick 3 distinct random recipes for B/L/D
+  const pick=[];
+  const used=new Set();
+  while(pick.length<3 && pick.length<pool.length){
+    const r=pool[Math.floor(Math.random()*pool.length)];
+    if(!used.has(r.id)){pick.push(r);used.add(r.id);}
+  }
+  
+  const slots=document.getElementById('mtwSlots');
+  if(!slots)return;
+  const labels=['🌅 Breakfast','☀️ Lunch','🌙 Dinner'];
+  slots.innerHTML=pick.map((r,i)=>`
+    <div class="mtw-slot">
+      <div class="mtw-slot-lbl">${labels[i]}</div>
+      <div class="mtw-dish-ico">${r.e}</div>
+      <div class="mtw-dish-name">${r.name}</div>
+      <div class="mtw-dish-cal">🔥 ${r.c} · ⏱ ${r.t}</div>
+      <button class="mtw-gen-btn" onclick="generateFromAgeTab('${r.name.replace(/'/g,"\\'")}')">✨ Generate Recipe</button>
+    </div>`).join('');
+  
+  const totalCal=pick.reduce((s,r)=>s+parseInt(r.c)||0,0);
+  const tv=document.getElementById('mtwTotalCal');
+  if(tv)tv.textContent='≈'+totalCal+' kcal';
+}
+
+/* ── Generate Recipe (FIXED — uses genBtnContent not genBtnContent) ── */
+function generateRecipe(){
+  const dish=(document.getElementById('gDish')?.value||'').trim();
+  if(!dish){showToast('Please enter a dish name 🍽️','warn');document.getElementById('gDish')?.focus();return;}
+  const btn=document.getElementById('genBtn');
+  const btnContent=document.getElementById('genBtnContent');
+  btn.classList.add('busy');
+  if(btnContent) btnContent.innerHTML='<span class="gen-spinner"></span>&nbsp;Generating recipe…';
+  
+  // Hide old result while loading
+  const rc=document.getElementById('resultCard');
+  if(rc) rc.classList.remove('on');
+  
+  setTimeout(()=>{
+    try{
+      const spice   = parseInt(document.getElementById('gSpice').value)||3;
+      const people  = pplCount||2;
+      const diet    = document.getElementById('gDiet').value||'Vegetarian';
+      const cuisine = document.getElementById('gCuisine').value||'North Indian';
+      const avoid   = (document.getElementById('gAvoid').value||'').trim();
+      const SL      = ['','😌 Mild','🙂 Light','😋 Medium','🥵 Hot','🔥 Extra Hot'];
+
+      const key = Object.keys(RTPL).find(k=>dish.toLowerCase().includes(k.toLowerCase()));
+      const tpl = key ? RTPL[key] : makeGenericTpl(dish,spice);
+
+      // Scale fresh ingredients
+      const fresh = tpl.fresh.map(i=>{
+        const qty = (i.qty==='per') ? Math.round(i.base*people) : (i.base||0);
+        if(!qty) return{...i,qtyStr:'As needed',totalPrice:0,priceStr:'—'};
+        const tp = Math.round(qty*(i.price||0));
+        return{...i,qtyStr:qty+' '+i.unit, totalPrice:tp, priceStr:tp>0?'₹'+tp:'—'};
+      });
+      
+      // Scale pantry
+      const pantry = tpl.pantry.map(i=>{
+        const qty = i.spice ? Math.max(0.5,+((i.base||1)*(spice/3)).toFixed(1)) : (i.base||0);
+        if(!qty||i.unit==='to taste') return{...i,qtyStr:'To taste',pkg:null};
+        const pk = getPkg(i.n);
+        return{...i,qtyStr:qty+' '+i.unit, pkg:pk};
+      });
+
+      const freshTotal = fresh.reduce((s,i)=>s+(i.totalPrice||0),0);
+
+      // Populate header
+      const rTitle=document.getElementById('rTitle');
+      const rCalTag=document.getElementById('rCalTag');
+      const rTags=document.getElementById('rTags');
+      if(rTitle)  rTitle.textContent = '🍽️ '+dish;
+      if(rCalTag) rCalTag.textContent = '🔥 '+(tpl.cal||'—');
+      if(rTags)   rTags.innerHTML = `
+        <span class="rtag">⏱ ${tpl.time||'—'}</span>
+        <span class="rtag">👨‍👩‍👧‍👦 ${people} serving${people>1?'s':''}</span>
+        <span class="rtag">🌶️ ${SL[spice]||''}</span>
+        <span class="rtag">🌍 ${cuisine}</span>
+        <span class="rtag">${diet}</span>`;
+      
+      const st=document.getElementById('servingText');
+      if(st) st.textContent='Scaled for '+people+' person'+(people>1?'s':'')+' · '+cuisine+' style';
+      
+      const fc=document.getElementById('freshCount');
+      const pc=document.getElementById('pantryCount');
+      if(fc) fc.textContent=fresh.length+' items';
+      if(pc) pc.textContent=pantry.length+' items';
+
+      window._fi=fresh; window._pi=pantry;
+
+      // Fresh cards (pre-checked)
+      const fg=document.getElementById('freshGrid');
+      if(fg) fg.innerHTML=fresh.map((i,idx)=>`
+        <div class="ingr-card checked" id="fw${idx}" onclick="toggleCard(this,'fw${idx}','fi${idx}')">
+          <input type="checkbox" checked class="ingr-chk" id="fi${idx}" onclick="event.stopPropagation()">
+          <div class="ingr-emoji">${i.e}</div>
+          <div class="ingr-info"><div class="ingr-name">${i.n}</div><div class="ingr-qty">${i.qtyStr}</div></div>
+          <div class="ingr-price">${i.priceStr||'—'}</div>
+        </div>`).join('');
+
+      // Pantry cards (not pre-checked)
+      const pg=document.getElementById('pantryGrid');
+      if(pg) pg.innerHTML=pantry.map((i,idx)=>`
+        <div class="ingr-card pantry-card" id="pw${idx}" onclick="toggleCard(this,'pw${idx}','pi${idx}')">
+          <input type="checkbox" class="ingr-chk" id="pi${idx}" onclick="event.stopPropagation()">
+          <div class="ingr-emoji">${i.e}</div>
+          <div class="ingr-info">
+            <div class="ingr-name">${i.n}</div>
+            <div class="ingr-qty">${i.qtyStr} needed</div>
+            ${i.pkg?`<div class="pkg-tag">📦 ${i.pkg.pkg} · ₹${i.pkg.price}</div>`:''}
+          </div>
+          <div class="ingr-price">${i.pkg?'₹'+i.pkg.price:'—'}</div>
+        </div>`).join('');
+
+      const cv=document.getElementById('costVal');
+      const cp=document.getElementById('costPer');
+      if(cv) cv.textContent = freshTotal>0 ? '₹'+freshTotal : '—';
+      if(cp) cp.textContent = freshTotal>0&&people>1 ? '≈ ₹'+Math.round(freshTotal/people)+' per person' : '';
+
+      const sb=document.getElementById('stepsBody');
+      if(sb) sb.innerHTML=(tpl.steps||[]).map((s,i)=>`<div class="step-item"><div class="step-num">${i+1}</div><span>${s}</span></div>`).join('');
+
+      const rn=document.getElementById('recipeNutrition');
+      if(rn) rn.innerHTML=Object.entries(tpl.nut||{}).map(([k,v])=>`<div class="rnut-item"><div class="rnut-val">${v}</div><div class="rnut-lbl">${k}</div></div>`).join('');
+
+      let tip=tpl.tips||'';
+      if(avoid) tip+=' ⚠️ Adjusted to avoid: '+avoid+'.';
+      const tb=document.getElementById('tipsBox');
+      const tt=document.getElementById('tipsTxt');
+      if(tip&&tb&&tt){tt.textContent=tip;tb.classList.add('on');}
+
+      if(rc) rc.classList.add('on');
+      setTimeout(()=>rc?.scrollIntoView({behavior:'smooth',block:'start'}),120);
+      showToast('Recipe ready! 🎉 Scroll down to see ingredients','pur');
+    }catch(err){
+      console.error('generateRecipe error:',err);
+      showToast('Something went wrong — please try again','err');
+    }finally{
+      btn.classList.remove('busy');
+      if(btnContent) btnContent.innerHTML='✨ Generate Full Recipe';
+    }
+  },1600);
+}
+
+function toggleCard(card,wid,cid){
+  const chk=document.getElementById(cid);if(!chk)return;
+  chk.checked=!chk.checked;
+  card.classList.toggle('checked',chk.checked);
+  if(card.classList.contains('pantry-card'))card.style.borderColor=chk.checked?'var(--acc)':'';
+}
+function toggleGroup(master,group){
+  const ingrs=group==='fresh'?(window._fi||[]):(window._pi||[]);
+  const pre=group==='fresh'?'fi':'pi', wp=group==='fresh'?'fw':'pw';
+  ingrs.forEach((_,idx)=>{
+    const chk=document.getElementById(pre+idx),wrap=document.getElementById(wp+idx);
+    if(chk){chk.checked=master.checked;if(wrap){wrap.classList.toggle('checked',master.checked);if(group==='pantry')wrap.style.borderColor=master.checked?'var(--acc)':'';};}
+  });
+}
+
+/* CHAT */
+function sendChat(txt){
+  if(chatTyping)return;
+  const inp=document.getElementById('chatinp');const t=txt||inp.value.trim();if(!t)return;if(!txt)inp.value='';
+  const msgs=document.getElementById('chatmsgs');
+  const u=document.createElement('div');u.className='cmsg user';u.textContent=t;msgs.appendChild(u);
+  const b=document.createElement('div');b.className='cmsg bot';b.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
+  msgs.appendChild(b);msgs.scrollTop=msgs.scrollHeight;chatTyping=true;
+  setTimeout(()=>{b.innerHTML=CHAT_REPLIES[Math.floor(Math.random()*CHAT_REPLIES.length)];msgs.scrollTop=msgs.scrollHeight;chatTyping=false;},1600);
+}
+/* CHAT */
+function sendChat(txt){
+  if(chatTyping)return;
+  const inp=document.getElementById('chatinp');const t=txt||inp.value.trim();if(!t)return;if(!txt)inp.value='';
+  const msgs=document.getElementById('chatmsgs');
+  const u=document.createElement('div');u.className='cmsg user';u.textContent=t;msgs.appendChild(u);
+  const b=document.createElement('div');b.className='cmsg bot';b.innerHTML='<div class="typing-dots"><span></span><span></span><span></span></div>';
+  msgs.appendChild(b);msgs.scrollTop=msgs.scrollHeight;chatTyping=true;
+  setTimeout(()=>{b.innerHTML=CHAT_REPLIES[Math.floor(Math.random()*CHAT_REPLIES.length)];msgs.scrollTop=msgs.scrollHeight;chatTyping=false;},1600);
+}
+
+/* SEARCH — only shows diet-compatible results */
+function doSearch(){
+  const q=document.getElementById('sinp').value.trim().toLowerCase();if(!q)return;
+  const compat=DIET_COMPAT[userDiet]||['veg','jain'];
+  const found=RDB.filter(r=>compat.includes(r.diet)&&(r.name.toLowerCase().includes(q)||r.desc.toLowerCase().includes(q)));
+  if(!found.length){showToast('No results for "'+q+'"');return;}
+  showSec('recipes');setAct(document.querySelectorAll('.nitem')[1]);
+  document.getElementById('rg2').innerHTML=found.map(rCard).join('');
+  const c=document.getElementById('recipe-count');if(c)c.textContent=found.length+' recipe(s)';
+  showToast('Found '+found.length+' recipe(s)','info');
+}
+
+/* PROFILE */
+function loadProfile(){
+  const name=localStorage.getItem('userName')||'';
+  document.getElementById('pname').value=name;
+  document.getElementById('page').value=localStorage.getItem('userAge')||'';
+  document.getElementById('pemail').value=localStorage.getItem('userEmail')||'';
+  document.getElementById('pphone').value=localStorage.getItem('userPhone')||'';
+  const loc=localStorage.getItem('userLoc'),diet=localStorage.getItem('userDiet');
+  if(loc)document.getElementById('ploc').value=loc;
+  if(diet)document.getElementById('pdiet').value=diet;
+  document.getElementById('pavt').textContent=(name.charAt(0).toUpperCase())||'C';
+}
+function openProfile(){document.getElementById('ppanel').classList.add('on');document.getElementById('pov1').classList.add('on');}
+function closeProfile(){document.getElementById('ppanel').classList.remove('on');document.getElementById('pov1').classList.remove('on');}
+function saveProfile(){
+  const name=document.getElementById('pname').value.trim();if(!name){showToast('Name is required','warn');return;}
+  const newDiet=document.getElementById('pdiet').value;
+  localStorage.setItem('userName',name);localStorage.setItem('userAge',document.getElementById('page').value);
+  localStorage.setItem('userEmail',document.getElementById('pemail').value);localStorage.setItem('userPhone',document.getElementById('pphone').value);
+  localStorage.setItem('userLoc',document.getElementById('ploc').value);localStorage.setItem('userDiet',newDiet);
+  userDiet=newDiet;userAge=parseInt(document.getElementById('page').value)||0;
+  document.getElementById('wuser').textContent='👋 Welcome back, '+name+'!';
+  document.getElementById('navName').textContent=name.split(' ')[0];
+  document.getElementById('navAv').textContent=name.charAt(0).toUpperCase();
+  document.getElementById('pavt').textContent=name.charAt(0).toUpperCase();
+  // Update diet theme
+  document.getElementById('body').className=document.getElementById('body').className.replace(/\b(dnv|deg|djn)\b/g,'').trim();
+  if(localStorage.getItem('darkMode')==='true')document.getElementById('body').classList.add('dark');
+  const tm={nonveg:'dnv',egg:'deg',jain:'djn'};
+  if(tm[newDiet])document.getElementById('body').classList.add(tm[newDiet]);
+  // Rebuild recipe chips and grids
+  buildChips('fc1','rg1');buildChips('fc2','rg2');renderR('rg1','');renderR('rg2','');
+  setupCal();showAgeTip();
+  closeProfile();showToast('Profile saved! ✅','ok');
+}
+
+/* PANELS */
+function openCart(){document.getElementById('cpanel').classList.add('on');document.getElementById('pov2').classList.add('on');}
+function closeCart(){document.getElementById('cpanel').classList.remove('on');document.getElementById('pov2').classList.remove('on');}
+
+/* SIDEBAR */
+function toggleSidebar(){
+  sideOpen=!sideOpen;const sb=document.getElementById('sidebar'),mn=document.getElementById('main');
+  if(window.innerWidth<=700){sb.classList.toggle('mob',sideOpen);}
+  else{sb.classList.toggle('collapsed',!sideOpen);mn.classList.toggle('expanded',!sideOpen);}
+}
+function setAct(el){document.querySelectorAll('.nitem').forEach(n=>n.classList.remove('act'));el.classList.add('act');}
+
+/* DARK MODE */
+function toggleDark(){
+  document.getElementById('body').classList.toggle('dark');
+  const d=document.getElementById('body').classList.contains('dark');
+  document.getElementById('dkbtn').textContent=d?'☀️':'🌙';
+  localStorage.setItem('darkMode',d);showToast(d?'Dark mode on 🌙':'Light mode on ☀️','info');
+}
+
+/* TIMER */
+function startTimer(secs,label){timerMax=secs;timerSec=secs;timerRunning=false;document.getElementById('tlbl').textContent=label||'Cooking Timer';document.getElementById('tgobtn').textContent='Start';document.getElementById('tbar').classList.add('on');updateTimerDisp();}
+function toggleTimer(){
+  const btn=document.getElementById('tgobtn');
+  if(timerRunning){clearInterval(timerInt);timerRunning=false;btn.textContent='Resume';}
+  else{timerRunning=true;btn.textContent='Pause';timerInt=setInterval(()=>{timerSec--;updateTimerDisp();if(timerSec<=0){clearInterval(timerInt);timerRunning=false;btn.textContent='Done!';showToast('⏰ Time is up! Serve hot!','ok');document.getElementById('tdisp').style.color='#ef4444';setTimeout(()=>document.getElementById('tdisp').style.color='var(--p)',2500);}},1000);}
+}
+function updateTimerDisp(){const m=Math.floor(timerSec/60),s=timerSec%60;document.getElementById('tdisp').textContent=(m<10?'0'+m:m)+':'+(s<10?'0'+s:s);}
+function resetTimerUI(){clearInterval(timerInt);timerRunning=false;timerSec=timerMax;updateTimerDisp();document.getElementById('tgobtn').textContent='Start';}
+function closeTimer(){clearInterval(timerInt);timerRunning=false;document.getElementById('tbar').classList.remove('on');}
+
+function logout(){if(confirm('Are you sure you want to logout?')){localStorage.clear();window.location.href='sign.html';}}
+
+function showToast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className='toast '+type+' show';clearTimeout(t._t);t._t=setTimeout(()=>{t.className='toast';},3400);}
+
+
+/* ══════════════════════════════════════════════
+   CART FUNCTIONS
+══════════════════════════════════════════════ */
+function addFreshToCart(){
+  const fi=window._fi||[];if(!fi.length){showToast('Generate a recipe first!','warn');return;}
+  let cnt=0;
+  fi.forEach((i,idx)=>{const chk=document.getElementById('fi'+idx);if(chk&&chk.checked){addToCart(i.n,i.qtyStr,i.totalPrice,'fresh');cnt++;}});
+  const pi=window._pi||[];
+  pi.forEach((i,idx)=>{const chk=document.getElementById('pi'+idx);if(chk&&chk.checked&&i.pkg)addToCart(i.n,i.pkg.pkg,i.pkg.price,'pantry');});
+  if(!cnt){showToast('No fresh items selected','warn');return;}
+  renderCart();animateBadge();showToast('🛒 '+cnt+' fresh ingredient'+(cnt>1?'s':'')+' added!','ok');
+}
+function addSelectedToCart(){
+  const fi=window._fi||[],pi=window._pi||[];let cnt=0;
+  fi.forEach((i,idx)=>{const chk=document.getElementById('fi'+idx);if(chk&&chk.checked){addToCart(i.n,i.qtyStr,i.totalPrice,'fresh');cnt++;}});
+  pi.forEach((i,idx)=>{const chk=document.getElementById('pi'+idx);if(chk&&chk.checked&&i.pkg){addToCart(i.n,i.pkg.pkg+' (pantry)',i.pkg.price,'pantry');cnt++;}});
+  if(!cnt){showToast('Select at least one ingredient','warn');return;}
+  renderCart();animateBadge();showToast('🛒 '+cnt+' item'+(cnt>1?'s':'')+' added!','ok');
+}
+function addToCart(name,meta,price,cat){
+  const ex=cartItems.find(c=>c.name===name);
+  if(ex){ex.qty++;ex.totalPrice+=(price||0);}
+  else cartItems.push({id:Date.now()+Math.random(),name,meta,price:price||0,qty:1,totalPrice:price||0,cat:cat||'fresh'});
+}
+function animateBadge(){
+  const b=document.getElementById('cbadge');
+  b.style.transform='scale(1.7)';b.style.background='#f59e0b';
+  setTimeout(()=>{b.style.transform='scale(1)';b.style.background='#ef4444';},380);
+}
+function renderCart(){
+  const tq=cartItems.reduce((s,c)=>s+c.qty,0);
+  document.getElementById('cbadge').textContent=tq;
+  document.getElementById('cartCountLbl').textContent=tq>0?tq+' item(s)':'';
+  const empty=document.getElementById('cartEmpty'),foot=document.getElementById('cartFoot'),body=document.getElementById('cartBody');
+  if(!cartItems.length){body.innerHTML='';empty.style.display='flex';foot.style.display='none';return;}
+  empty.style.display='none';foot.style.display='block';
+  const fi=cartItems.filter(c=>c.cat!=='pantry'),pi=cartItems.filter(c=>c.cat==='pantry');
+  let html='';
+  if(fi.length) html+=`<div class="cart-section-hdr"><span class="csh-ico">🛒</span>Fresh Ingredients<span class="csh-count">${fi.length} items</span></div>${fi.map(c=>cItemHTML(c,false)).join('')}`;
+  if(pi.length) html+=`<div class="cart-section-hdr" style="margin-top:12px"><span class="csh-ico">🫙</span>Pantry / Masala Packs<span class="csh-count">${pi.length} items</span></div>${pi.map(c=>cItemHTML(c,true)).join('')}`;
+  body.innerHTML=html;
+  const ft=fi.reduce((s,c)=>s+c.totalPrice,0),pt=pi.reduce((s,c)=>s+c.totalPrice,0),gt=ft+pt;
+  let sum=`<div class="csr"><span>Fresh ingredients</span><span>₹${ft}</span></div>`;
+  if(pt>0) sum+=`<div class="csr"><span>Pantry packs</span><span>₹${pt}</span></div>`;
+  sum+=`<div class="csr total"><span>Grand Total</span><span>₹${gt}</span></div>`;
+  document.getElementById('cartSummary').innerHTML=sum;
+}
+function cItemHTML(c,isPantry){
+  return`<div class="citem ${isPantry?'pantry-item':''}">
+    <div class="cico">${getEmoji(c.name)}</div>
+    <div class="cdetail"><div class="cname">${c.name}</div><div class="cmeta">${c.meta}</div>${isPantry?'<div class="cpkg-tag">📦 Full pack</div>':''}</div>
+    <div class="cqty"><button class="cqbtn" onclick="updCart(${c.id},-1)">−</button><div class="cqval">${c.qty}</div><button class="cqbtn" onclick="updCart(${c.id},1)">+</button></div>
+    <div class="cprice">${c.price>0?'₹'+c.totalPrice:'—'}</div>
+    <button class="cdel" onclick="delCart(${c.id})">🗑</button>
+  </div>`;
+}
+function updCart(id,d){const c=cartItems.find(x=>x.id===id);if(!c)return;c.qty+=d;c.totalPrice=c.price*c.qty;if(c.qty<=0)cartItems=cartItems.filter(x=>x.id!==id);renderCart();}
+function delCart(id){cartItems=cartItems.filter(x=>x.id!==id);renderCart();showToast('Removed from cart','info');}
+function clearCart(){cartItems=[];renderCart();showToast('Cart cleared','info');}
+function checkout(){if(!cartItems.length)return;const t=cartItems.reduce((s,c)=>s+c.totalPrice,0);showToast('🎉 Order placed! Total: ₹'+t,'ok');cartItems=[];renderCart();closeCart();}
+function getEmoji(n){
+  n=(n||'').toLowerCase();
+  if(n.includes('paneer'))return'🧀';if(n.includes('chicken'))return'🍗';if(n.includes('mutton'))return'🍖';
+  if(n.includes('fish'))return'🐟';if(n.includes('tomato'))return'🍅';if(n.includes('onion'))return'🧅';
+  if(n.includes('garlic'))return'🧄';if(n.includes('butter'))return'🧈';if(n.includes('cream')||n.includes('milk'))return'🥛';
+  if(n.includes('egg'))return'🥚';if(n.includes('rice'))return'🍚';if(n.includes('dal')||n.includes('lentil'))return'🫘';
+  if(n.includes('spinach')||n.includes('palak'))return'🥬';if(n.includes('potato')||n.includes('aloo'))return'🥔';
+  if(n.includes('oil')||n.includes('ghee'))return'🫙';if(n.includes('salt')||n.includes('sugar'))return'🧂';
+  if(n.includes('chilli')||n.includes('chili'))return'🌶️';if(n.includes('coriander'))return'🌿';
+  if(n.includes('ginger'))return'🫚';if(n.includes('cashew'))return'🌰';if(n.includes('saffron'))return'🌸';
+  if(n.includes('mint'))return'🌿';if(n.includes('lemon'))return'🍋';if(n.includes('yogurt')||n.includes('curd'))return'🍶';
+  if(n.includes('cauliflower'))return'🥦';if(n.includes('banana'))return'🍌';if(n.includes('oat'))return'🌾';
+  if(n.includes('masala'))return'🫙';return'🛒';
+}
+
+/* ══════════════════════════════════════════════
+   GROCERY / SHOPPING LIST
+══════════════════════════════════════════════ */
+function renderG(id){
+  const el=document.getElementById(id);if(!el)return;
+  el.innerHTML=groceries.slice(0,6).map(g=>`<li class="gitem ${g.done?'done':''}"><input type="checkbox" ${g.done?'checked':''} onchange="toggleG(${g.id})"><label onclick="toggleG(${g.id})">${g.text}</label><button class="dx" onclick="delG(${g.id})">🗑</button></li>`).join('');
+}
+function renderShopList(){
+  const cats={'🥦 Fresh Produce':[],'🥛 Dairy & Eggs':[],'🍗 Meat & Protein':[],'🛒 Other':[]};
+  groceries.forEach(g=>{
+    const n=g.text.toLowerCase();
+    if(n.includes('milk')||n.includes('paneer')||n.includes('curd')||n.includes('egg')||n.includes('cream')||n.includes('butter'))cats['🥛 Dairy & Eggs'].push(g);
+    else if(n.includes('chicken')||n.includes('mutton')||n.includes('fish'))cats['🍗 Meat & Protein'].push(g);
+    else if(n.includes('tomato')||n.includes('onion')||n.includes('potato')||n.includes('palak')||n.includes('spinach')||n.includes('garlic')||n.includes('ginger')||n.includes('coriander')||n.includes('lemon')||n.includes('cauliflower'))cats['🥦 Fresh Produce'].push(g);
+    else cats['🛒 Other'].push(g);
+  });
+  let out='';
+  Object.entries(cats).forEach(([cat,items])=>{
+    if(!items.length)return;
+    out+=`<div class="shop-cat"><div class="shop-cat-hdr">${cat}<span style="font-size:.72rem;margin-left:8px;color:var(--p);font-weight:700">${items.length} item${items.length>1?'s':''}</span></div>${items.map(g=>`<div class="shop-item ${g.done?'done':''}"><input type="checkbox" ${g.done?'checked':''} onchange="toggleG(${g.id})"><label onclick="toggleG(${g.id})">${g.text}</label><span class="siprice">${g.price?'₹'+g.price:''}</span><button class="dx" onclick="delG(${g.id})">🗑</button></div>`).join('')}</div>`;
+  });
+  const wrap=document.getElementById('shopListWrap');
+  if(wrap)wrap.innerHTML=out||'<div style="text-align:center;padding:30px;color:var(--muted)">Shopping list is empty. Add items above!</div>';
+  const total=groceries.reduce((s,g)=>s+(g.price||0),0);
+  const tr=document.getElementById('shopTotalRow'),tv=document.getElementById('shopTotal');
+  if(tr&&tv){tr.style.display=total>0?'flex':'none';tv.textContent='₹'+total;}
+}
+function addG1(){const v=document.getElementById('gi1').value.trim();if(!v)return;groceries.push({id:gc++,text:v,done:false,price:0});document.getElementById('gi1').value='';renderG('gl1');renderShopList();showToast('Added ✓','ok');}
+function addG2(){const v=document.getElementById('gi2').value.trim();if(!v)return;groceries.push({id:gc++,text:v,done:false,price:0});document.getElementById('gi2').value='';renderG('gl1');renderShopList();showToast('Added ✓','ok');}
+function toggleG(id){const g=groceries.find(x=>x.id===id);if(g){g.done=!g.done;renderG('gl1');renderShopList();}}
+function delG(id){groceries=groceries.filter(x=>x.id!==id);renderG('gl1');renderShopList();}
+function clearDone(){groceries=groceries.filter(x=>!x.done);renderG('gl1');renderShopList();showToast('Cleared checked items','info');}
+
+/* ══════════════════════════════════════════════
+   MEAL LOG
+══════════════════════════════════════════════ */
+function renderMealLog(){
+  const el=document.getElementById('mllog');if(!el)return;
+  el.innerHTML=meals.map(m=>`<li class="gitem ${m.done?'done':''}"><input type="checkbox" ${m.done?'checked':''} onchange="toggleM(${m.id})"><label>${m.text}</label><button class="dx" onclick="delM(${m.id})">🗑</button></li>`).join('');
+}
+function logMeal(){const v=document.getElementById('mli').value.trim();if(!v)return;meals.push({id:mc++,text:v,done:false});document.getElementById('mli').value='';renderMealLog();showToast('Meal logged! 🍽️','ok');}
+function toggleM(id){const m=meals.find(x=>x.id===id);if(m){m.done=!m.done;renderMealLog();}}
+function delM(id){meals=meals.filter(x=>x.id!==id);renderMealLog();}
+
+/* ══════════════════════════════════════════════
+   NUTRITION BARS
+══════════════════════════════════════════════ */
+function renderNB(id,data){
+  const el=document.getElementById(id);if(!el)return;
+  el.innerHTML=data.map(n=>`<div class="nrow"><div class="nhdr"><span>${n.n}</span><span>${n.v}%</span></div><div class="nbar"><div class="nfill" data-w="${n.v}%" style="width:0%;background:${n.col}"></div></div></div>`).join('');
+  setTimeout(()=>document.querySelectorAll('#'+id+' .nfill').forEach(e=>e.style.width=e.dataset.w),200);
+}
+
+/* ══════════════════════════════════════════════
+   MEAL PLANNER
+══════════════════════════════════════════════ */
+function renderMealDays(){
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const plans=[['Poha','Dal Rice','Paneer'],['Paratha','Chole','Rajma'],['Idli','Palak Paneer','Dal'],['Oats','Biryani',''],['','Aloo Gobi','Dosa'],['Upma','Egg Bhurji',''],['','','Butter Chicken']];
+  const today=new Date().getDay(),todayIdx=today===0?6:today-1,date=new Date();
+  const el=document.getElementById('mdays');if(!el)return;
+  el.innerHTML=days.map((d,i)=>{const dd=new Date(date);dd.setDate(date.getDate()-(todayIdx-i));return`<div class="mday ${i===todayIdx?'today':''}"><div class="mday-name">${d}</div><div class="mday-date">${dd.getDate()}</div><div class="mday-meals">${['B','L','D'].map((l,j)=>`<div class="mmeal ${plans[i][j]?'filled':''}">${plans[i][j]||l}</div>`).join('')}</div></div>`;}).join('');
+}
+
+/* ══════════════════════════════════════════════
+   HYDRATION
+══════════════════════════════════════════════ */
+function renderHydration(){
+  const el=document.getElementById('hrow');if(!el)return;
+  el.innerHTML=Array.from({length:8},(_,i)=>`<button class="gbtn ${i<wg?'filled':''}" onclick="logW(${i+1})">💧</button>`).join('')+`<span style="font-size:.88rem;font-weight:800;color:var(--p);margin-left:8px">${wg}/8</span>`;
+  const hf=document.getElementById('hpfill');if(hf)hf.style.width=Math.round((wg/8)*100)+'%';
+  const ht=document.getElementById('htxt');if(ht)ht.textContent=wg>=8?'🎉 Daily goal reached! Excellent!':wg>=5?'💪 Almost there! '+(8-wg)+' more glass(es)!':'🌊 Stay hydrated — drink up!';
+  document.getElementById('sv-w').textContent=wg+'/8';
+}
+function logW(n){wg=n;renderHydration();showToast(n>=8?'Goal reached! 🎉':'Logged '+n+' glass'+(n>1?'es':'')+' 💧','ok');}
+function resetH(){wg=0;renderHydration();showToast('Hydration reset','info');}
+
+/* ══════════════════════════════════════════════
+   NOTIFICATIONS
+══════════════════════════════════════════════ */
+function renderNotifs(){
+  const el=document.getElementById('nlist');if(!el)return;
+  el.innerHTML=NOTIFS.map(n=>`<div class="ni-item ${n.unread?'unread':''}"><div class="ni-ico">${n.ico}</div><div style="flex:1"><div class="ni-title">${n.title}</div><div class="ni-sub">${n.sub}</div></div><div class="ni-time">${n.time}</div></div>`).join('');
+  document.getElementById('ndot').className='ndot'+(NOTIFS.some(n=>n.unread)?' on':'');
+}
+function markAllRead(){NOTIFS.forEach(n=>n.unread=false);document.querySelectorAll('.ni-item').forEach(el=>el.classList.remove('unread'));document.getElementById('ndot').classList.remove('on');showToast('All caught up! ✓','ok');}
+function openNotif(){document.getElementById('notifPanel').classList.add('on');document.getElementById('pov3').classList.add('on');}
+function closeNotif(){document.getElementById('notifPanel').classList.remove('on');document.getElementById('pov3').classList.remove('on');}
+
+/* ══════════════════════════════════════════════
+   ACTIVITY
+══════════════════════════════════════════════ */
+function renderActs(){
+  const el=document.getElementById('alist');if(!el)return;
+  el.innerHTML=ACTS.map(a=>`<div class="aitem"><div class="aico" style="background:${a.bg}">${a.ico}</div><div><div class="atitle">${a.title}</div><div class="atime">${a.time}</div></div><div class="aright">${a.right}</div></div>`).join('');
+}
+
+/* ══════════════════════════════════════════════
+   PANELS — open/close cart, profile, notifs
+══════════════════════════════════════════════ */
+function openCart(){document.getElementById('cpanel').classList.add('on');document.getElementById('pov2').classList.add('on');}
+function closeCart(){document.getElementById('cpanel').classList.remove('on');document.getElementById('pov2').classList.remove('on');}
+
+/* ══════════════════════════════════════════════
+   SIDEBAR
+══════════════════════════════════════════════ */
+function toggleSidebar(){
+  sideOpen=!sideOpen;const sb=document.getElementById('sidebar'),mn=document.getElementById('main');
+  if(window.innerWidth<=700){sb.classList.toggle('mob',sideOpen);}
+  else{sb.classList.toggle('collapsed',!sideOpen);mn.classList.toggle('expanded',!sideOpen);}
+}
+function setAct(el){document.querySelectorAll('.nitem').forEach(n=>n.classList.remove('act'));el.classList.add('act');}
+
+/* ══════════════════════════════════════════════
+   DARK MODE
+══════════════════════════════════════════════ */
+function toggleDark(){
+  document.getElementById('body').classList.toggle('dark');
+  const d=document.getElementById('body').classList.contains('dark');
+  document.getElementById('dkbtn').textContent=d?'☀️':'🌙';
+  localStorage.setItem('darkMode',d);
+  showToast(d?'Dark mode on 🌙':'Light mode on ☀️','info');
+}
+
+/* ══════════════════════════════════════════════
+   TIMER
+══════════════════════════════════════════════ */
+function startTimer(secs,label){timerMax=secs;timerSec=secs;timerRunning=false;document.getElementById('tlbl').textContent=label||'Cooking Timer';document.getElementById('tgobtn').textContent='Start';document.getElementById('tbar').classList.add('on');updateTimerDisp();}
+function toggleTimer(){
+  const btn=document.getElementById('tgobtn');
+  if(timerRunning){clearInterval(timerInt);timerRunning=false;btn.textContent='Resume';}
+  else{timerRunning=true;btn.textContent='Pause';timerInt=setInterval(()=>{timerSec--;updateTimerDisp();if(timerSec<=0){clearInterval(timerInt);timerRunning=false;btn.textContent='Done!';showToast('⏰ Time is up! Serve hot!','ok');document.getElementById('tdisp').style.color='#ef4444';setTimeout(()=>document.getElementById('tdisp').style.color='var(--p)',2500);}},1000);}
+}
+function updateTimerDisp(){const m=Math.floor(timerSec/60),s=timerSec%60;document.getElementById('tdisp').textContent=(m<10?'0'+m:m)+':'+(s<10?'0'+s:s);}
+function resetTimerUI(){clearInterval(timerInt);timerRunning=false;timerSec=timerMax;updateTimerDisp();document.getElementById('tgobtn').textContent='Start';}
+function closeTimer(){clearInterval(timerInt);timerRunning=false;document.getElementById('tbar').classList.remove('on');}
+
+/* ══════════════════════════════════════════════
+   LOGOUT
+══════════════════════════════════════════════ */
+function logout(){if(confirm('Are you sure you want to logout?')){localStorage.clear();window.location.href='sign.html';}}
+
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closeAI();closeMod();closeProfile();closeCart();closeNotif();}
+  if((e.ctrlKey||e.metaKey)&&e.key==='k'){e.preventDefault();document.getElementById('sinp').focus();}
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Smart Cooking — Sign In</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="sign.css">
+</head>
+<body id="bodyTheme">
+
+<div class="blob blob-1"></div>
+<div class="blob blob-2"></div>
+<div class="blob blob-3"></div>
+
+<!-- LEFT PANEL -->
+<div class="left-panel">
+  <div class="logo-badge">🍳 AI Smart Cooking</div>
+  <h1>Cook Smarter,<span>Eat Better.</span></h1>
+  <p>Your personal AI kitchen assistant that personalises recipes, plans meals and manages your groceries effortlessly.</p>
+  <ul class="feature-list">
+    <li><div class="icon-wrap">🍳</div> AI-powered recipe suggestions</li>
+    <li><div class="icon-wrap">🛒</div> Smart grocery cart management</li>
+    <li><div class="icon-wrap">🥗</div> Personalised diet plans</li>
+    <li><div class="icon-wrap">📊</div> Detailed nutrition insights</li>
+  </ul>
+  <div class="stats-row">
+    <div class="stat-box"><strong>10K+</strong><span>Recipes</span></div>
+    <div class="stat-box"><strong>50K+</strong><span>Users</span></div>
+    <div class="stat-box"><strong>4.9★</strong><span>Rated</span></div>
+  </div>
+</div>
+
+<!-- RIGHT PANEL -->
+<div class="right-panel">
+  <div class="card">
+
+    <!-- Step dots -->
+    <div class="steps">
+      <div class="step-dot active" id="s1"></div>
+      <div class="step-dot"        id="s2"></div>
+      <div class="step-dot"        id="s3"></div>
+    </div>
+
+    <!-- Card header -->
+    <div class="card-header">
+      <h2 id="rTitle">Welcome back</h2>
+      <p id="rSub">Sign in to continue to your kitchen dashboard.</p>
+    </div>
+
+    <!-- Demo strip -->
+    <div class="demo-strip" id="demoStrip">
+      <div class="demo-strip-h">Try a demo account — click to auto-fill</div>
+      <div class="demo-btns" id="demoRow"></div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab on" id="tA" onclick="sw('login')">🔑 Sign In</button>
+      <button class="tab"   id="tB" onclick="sw('guest')">🚀 Quick Access</button>
+    </div>
+
+    <!-- ── SIGN IN ── -->
+    <div id="pLogin">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Email Address *</label>
+          <input id="lE" type="email" placeholder="you@example.com" oninput="ce('lE','eE');markStep1()"/>
+          <span class="error-msg" id="eE"></span>
+        </div>
+        <div class="form-group">
+          <label>Password *</label>
+          <div class="pw-wrap">
+            <input id="lP" type="password" placeholder="Min 8 characters" oninput="ce('lP','eP');markStep1()"/>
+            <button class="pw-toggle" type="button" onclick="te()" id="eyeB">👁️</button>
+          </div>
+          <span class="error-msg" id="eP"></span>
+        </div>
+      </div>
+
+      <div class="row-mid">
+        <label class="rem-label"><input type="checkbox" id="rem"/> Remember me</label>
+        <button class="forgot-btn" type="button" onclick="fp()">Forgot password?</button>
+      </div>
+
+      <button class="submit-btn" id="loginBtn" onclick="dl()">🍳 Sign In to Dashboard →</button>
+
+      <div class="divider">or continue with</div>
+      <div class="socials">
+        <button class="soc g" type="button" onclick="sl('Google')">🌐 Google</button>
+        <button class="soc f" type="button" onclick="sl('Facebook')">📘 Facebook</button>
+        <button class="soc o" type="button" onclick="sl('OTP')">📱 OTP</button>
+      </div>
+
+      <div class="card-foot">
+        Don't have an account?
+        <button class="link-btn" type="button" onclick="goSignup()">Create one free →</button>
+      </div>
+    </div>
+
+    <!-- ── QUICK ACCESS (GUEST) ── -->
+    <div id="pGuest" style="display:none">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Full Name *</label>
+          <input id="gN" type="text" placeholder="e.g. Arjun Sharma" oninput="ce('gN','eGN');markStep1()"/>
+          <span class="error-msg" id="eGN"></span>
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <select id="gC">
+            <option value="">Select city</option>
+            <option>Mathura</option><option>Noida</option><option>Delhi</option>
+            <option>Lucknow</option><option>Kanpur</option><option>Agra</option>
+            <option>Varanasi</option><option>Meerut</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Cooking Level</label>
+          <select id="gS">
+            <option value="beginner">🌱 Beginner – Easy recipes</option>
+            <option value="home">🍳 Home Cook – Everyday meals</option>
+            <option value="advanced">👨‍🍳 Advanced – Complex dishes</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Diet Preference *</label>
+          <span class="error-msg" id="eGD" style="margin-bottom:4px"></span>
+          <div class="diet-chips" id="dietChips">
+            <div class="diet-chip veg"    data-val="veg"    onclick="selDiet(this)">🥦 Vegetarian</div>
+            <div class="diet-chip nonveg" data-val="nonveg" onclick="selDiet(this)">🍗 Non-Veg</div>
+            <div class="diet-chip egg"    data-val="egg"    onclick="selDiet(this)">🥚 Eggetarian</div>
+            <div class="diet-chip jain"   data-val="jain"   onclick="selDiet(this)">🪷 Jain</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="submit-btn" id="guestBtn" onclick="dg()" style="margin-top:16px">🚀 Explore as Guest →</button>
+
+      <div class="card-foot" style="margin-top:12px;line-height:2">
+        Guest sessions are temporary.
+        <button class="link-btn teal" type="button" onclick="goSignup()">Create free account →</button>
+      </div>
+      <div class="card-foot" style="margin-top:6px">
+        Already registered?
+        <button class="link-btn" type="button" onclick="sw('login')">Sign In →</button>
+      </div>
+    </div>
+
+  </div><!-- /card -->
+</div><!-- /right-panel -->
+
+<div class="toast" id="toast"></div>
+
+<script src="sign.js"></script>
+</body>
+</html>
